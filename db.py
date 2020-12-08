@@ -20,7 +20,21 @@ association_table_3 = db.Table(
     'association3',
     db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'))
+    db.Column('user_id', db.Integer, db.ForeignKey('tag.id'))
+)
+
+association_table_4 = db.Table(
+    'association4',
+    db.Model.metadata,
+    db.Column('request_id', db.Integer, db.ForeignKey('friend.id')),
+    db.Column('sender_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+association_table_5 = db.Table(
+    'association5',
+    db.Model.metadata,
+    db.Column('request_id', db.Integer, db.ForeignKey('friend.id')),
+    db.Column('receiver_id', db.Integer, db.ForeignKey('user.id'))
 )
 
 
@@ -79,16 +93,21 @@ class User(db.Model):
     name = db.Column(db.String, nullable=False)
     netid = db.Column(db.String, nullable=False)
     social_account = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False)
     event_created = db.relationship('Event', secondary=association_table_1, back_populates='creator')
     event_interested = db.relationship('Event', secondary=association_table_2, back_populates='attender')
+    sent_request = db.relationship('Friend', secondary=association_table_4, back_populates='sender_id') #only successfully accepted shows
+    received_request = db.relationship('Friend', secondary=association_table_5, back_populates='receiver_id') #only successfully accepted shows
     x = 0
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
         self.netid = kwargs.get('netid', '')
+        self.password = kwargs.get('password', '')
         self.social_account = kwargs.get('social_account', '')
     
-    def serialize(self):  
+    
+    def serialize(self): 
         event_created = []
         event_interested = []
         for i in self.event_created:
@@ -120,9 +139,10 @@ class User(db.Model):
     class Friend(db.Model):
         __tablename__ = 'friend'
         id = db.Column(db.Integer, primary_key=True)
-        sender_id = db.Column(db.String, nullable=False)
-        receiver_id = db.Column(db.String, nullable=False)
-        catagory = db.Column(db.String)
+        sender_id = db.relationship('User', secondary=association_table_4, back_populates='sent_request')
+        receiver_id = db.relationship('User', secondary=association_table_5, back_populates='received_request')
+        sender_catagory = db.Column(db.String, nullable=False) #sender set receiver
+        receiver_catagory = db.Column(db.String, nullable=False) #receiver set sender
         accepted = db.Column(db.String)
     
     def __init__(self, **kwargs):
