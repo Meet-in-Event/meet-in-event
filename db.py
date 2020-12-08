@@ -87,8 +87,10 @@ class User(db.Model):
         self.netid = kwargs.get('netid', '')
     
     def serialize(self):  
+        event_created = []
+        event_interested = []
         for i in self.event_created:
-            event_created = {
+            event_created += {
                 'id': i.id,
                 'title': i.title,
                 'location': i.location,
@@ -97,7 +99,7 @@ class User(db.Model):
                 'tag': i.tag
             }
         for i in self.event_interested:
-            event_interested = {
+            event_interested += {
                 'id': i.id,
                 'title': i.title,
                 'location': i.location,
