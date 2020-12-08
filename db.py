@@ -78,6 +78,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     netid = db.Column(db.String, nullable=False)
+    social_account = db.Column(db.String, nullable=False)
     event_created = db.relationship('Event', secondary=association_table_1, back_populates='creator')
     event_interested = db.relationship('Event', secondary=association_table_2, back_populates='attender')
     x = 0
@@ -85,6 +86,7 @@ class User(db.Model):
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
         self.netid = kwargs.get('netid', '')
+        self.social_account = kwargs.get('social_account', '')
     
     def serialize(self):  
         event_created = []
