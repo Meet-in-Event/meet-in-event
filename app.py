@@ -170,12 +170,17 @@ def get_all_events():
     for e in Event.query.all():
         if e.publicity is None:
             response.append(e.serialize())
-        elif e.publicity is "friend_only":
-            if user is in e.creator.friends:
+        #what if the initiator wants to let all friends to view the event?
+        elif e.publicity == "All":
+            if Friend.query.filter_by(sender_id = e.creator.id, receiver_id = user).first() is not None or Friend.query.filter_by(sender_id = user, receiver_id = e.creator.id).first() is not None: 
+                response.append(e.serialize())
+        else:
+            if Friend.query.filter_by(sender_id = e.creator.id, receiver_id = user,sender_catagory = category).first() is not None or Friend.query.filter_by(sender_id = user, receiver_id = e.creator.id, receiver_catagory = category).first() is not None: 
+            
                 #just finished the friends' methods, next step: make a whole list of friends
                 response.append(e.serialize())
 
-    return success_response([c.serialize() for c in response.query.all()])
+    return success_response([c.serialize() for c in response])
 
 
 @app.route("/api/courses/<int:event_id>/")
