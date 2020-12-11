@@ -24,6 +24,8 @@ def failure_response(message, code = 404):
 
 # ----------- USER ROUTES -------------------------------------------------------------------
 
+# Update for all the fields; user interest event; delete friend
+
 @app.route("/api/users/", methods=['POST'])
 def create_user():
     body = json.loads(request.data)
@@ -141,7 +143,7 @@ def delete_event(event_id):
     return success_response(course.serialize())
 
 
-@app.route("/api/event/<int:event_id>/drop/", methods=["DELETE"])
+@app.route("/api/event/<int:event_id>/", methods=["DELETE"])
 def delete_interested_event(event_id):
     body = json.loads(request.data)
     event = Event.query.filter_by(id = event_id).first()
@@ -181,7 +183,6 @@ def get_all_events():
                 response.append(e.serialize())
 
     return success_response([c.serialize() for c in response])
-
 
 @app.route("/api/courses/<int:event_id>/")
 def get_event(event_id): 
