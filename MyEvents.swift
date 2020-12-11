@@ -1,28 +1,16 @@
 //
-//  EventPage.swift
+//  MyEvents.swift
 //  ChatApp
 //
-//  Created by Charlie Brush on 12/6/20.
+//  Created by Charlie Brush on 12/10/20.
 //
 
 import UIKit
 import SnapKit
 
 
-protocol View: class {
-    func getEvent() -> Event?
-    func getUser() -> User
-    func setFriend2(i: User)
-    func setEvent(i: Event)
-    func removeEvent(i: Event)
-    func setFav(i: Event)
-    func removeFav(i: Event)
-    func removeFromView(i: Event)
-    func addToView(i: Event)
-}
 
-
-class EventPage: UIViewController {
+class MyEvents: UIViewController {
     var eventCollectionView: UICollectionView!
     let eventCellReuseIdentifier = "eventCellReuseIdentifier"
     let padding: CGFloat = 8
@@ -31,28 +19,43 @@ class EventPage: UIViewController {
     
     var currentEvent: Event!
     var currentIndex: Int!
-    
-    
-    
+    var user: User!
 
     var events: [Event]!
-    var allEvents: [Event]!
     
+    var which: Int!
     
-
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.barTintColor = barColor
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+        view.backgroundColor = .white
+        if which==0 {
+            self.title = "My Events"
+        }
+        else {
+            self.title = "Created Events"
+        }
         
         
-        allEvents = delegate?.getEvents()
+        user = delegate?.getUser()
         events = []
-        for i in allEvents {
-            if i.people.count < i.max {
-                events.append(i)
-                print(i)
+        if which==0 {
+            if let e = user.events {
+                for i in e {
+                    events.append(i)
+                }
             }
         }
+        if which==1 {
+            if let e = user.createdEvents {
+                for i in e {
+                    events.append(i)
+                }
+            }
+        }
+        
         
         
         let layout = UICollectionViewFlowLayout()
@@ -69,14 +72,16 @@ class EventPage: UIViewController {
         
         
         
+        
         setupConstraints()
         
     }
     
     func setupConstraints() {
         
+        
         eventCollectionView.snp.makeConstraints{ make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(45)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(5)
             make.leading.equalToSuperview().offset(padding)
             make.bottom.equalToSuperview()
             make.trailing.equalToSuperview().offset(-padding)
@@ -87,12 +92,10 @@ class EventPage: UIViewController {
 }
 
 
-extension EventPage: UICollectionViewDataSource {
+extension MyEvents: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
         return events.count
             
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -112,7 +115,7 @@ extension EventPage: UICollectionViewDataSource {
 
 
 
-extension EventPage: UICollectionViewDelegateFlowLayout {
+extension MyEvents: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -126,7 +129,7 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
 
 }
 
-extension EventPage: View {
+extension MyEvents: View {
     func setFriend2(i: User) {
 
         delegate?.setFriend3(i: i)
@@ -138,7 +141,6 @@ extension EventPage: View {
     
     func setEvent(i: Event) {
         delegate?.setuserEvent(event: i)
-        eventCollectionView.reloadData()
     }
     
     func getUser() -> User {
@@ -170,25 +172,28 @@ extension EventPage: View {
         events = e
         eventCollectionView.reloadData()
     }
-    
     func addToView(i: Event) {
-        var pos=(-1)
+        var pos=0
+        var l=0
         for j in events {
             if j.name==i.name {
-                pos=1
+                l=pos
             }
+            pos+=1
         }
-        if pos == -1 {
-            events.append(i)
-        }
+        events.remove(at: l)
         eventCollectionView.reloadData()
+        
+        print("addToView running")
+        
+        self.delegate?.addEvent(i: i)
     }
     
     
 }
 
 
-extension EventPage: UICollectionViewDelegate {
+extension MyEvents: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         currentEvent = events[indexPath.row]
@@ -204,9 +209,4 @@ extension EventPage: UICollectionViewDelegate {
 
     }
 }
-
-
-
-    
-    
 

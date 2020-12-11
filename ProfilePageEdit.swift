@@ -25,7 +25,7 @@ class ProfilePageEdit: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = backgroundColor
+        view.backgroundColor = backColor
         title = "Edit Profile"
         
         user = delegate?.getUser()

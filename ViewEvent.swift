@@ -34,6 +34,8 @@ class ViewEvent: UIViewController {
     var users2: [User]!
     var added: [User]!
     
+    var sign: Int!
+    
     var isadded: Bool!
     
     var signUpButton: UIButton!
@@ -46,7 +48,7 @@ class ViewEvent: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = backgroundColor
+        view.backgroundColor = backColor
  
         
         event = delegate?.getEvent()
@@ -151,6 +153,16 @@ class ViewEvent: UIViewController {
         signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
         view.addSubview(signUpButton)
         
+        sign=0
+        if let c = user.createdEvents {
+            for i in c {
+                if i.name==event.name {
+                    signUpButton=nil
+                    sign=1
+                }
+            }
+        }
+        
         
 
     }
@@ -217,29 +229,38 @@ class ViewEvent: UIViewController {
             make.bottom.equalToSuperview().offset(-offset)
             make.width.equalTo(((width)*1/2))
         }
-        
-        signUpButton.snp.makeConstraints{make in
-            make.top.equalTo(desc.snp.top)
-            make.leading.equalTo(desc.snp.trailing).offset(offset)
-            make.trailing.equalToSuperview().offset(-offset)
-            make.height.equalTo(50)
+        if sign==0 {
+            signUpButton.snp.makeConstraints{make in
+                make.top.equalTo(desc.snp.top)
+                make.leading.equalTo(desc.snp.trailing).offset(offset)
+                make.trailing.equalToSuperview().offset(-offset)
+                make.height.equalTo(50)
+            }
         }
         
         
     }
     
     @objc func signUpTapped() {
+        print("signup tapped")
         if isadded==false {
             signUpButton.backgroundColor = eventColor
             delegate?.setEvent(i: event)
+            if event.people.count>=event.max {
+                delegate?.removeFromView(i: event)
+            }
             isadded=true
             }
         else {
             isadded=false
             signUpButton.backgroundColor = buttonColor
             delegate?.removeEvent(i: event)
+            if event.people.count<event.max {
+                delegate?.addToView(i: event)
+                print("added to view")
+            }
         }
-        delegate?.removeFromView(i: event)
+        
         
     }
 
@@ -257,7 +278,7 @@ extension ViewEvent: UICollectionViewDataSource {
 
         cell.configure(for: users2[indexPath.item])
 
-        userCollectionView.backgroundColor = backgroundColor
+        userCollectionView.backgroundColor = backColor
         return cell
 
 
