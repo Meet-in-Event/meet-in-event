@@ -24,7 +24,7 @@ def failure_response(message, code = 404):
 
 # ----------- USER ROUTES -------------------------------------------------------------------
 
-# Update for all the fields; user interest event; delete friend
+# TODO: Function for updating for all the fields
 
 @app.route("/api/users/", methods=['POST'])
 def create_user():
@@ -40,59 +40,100 @@ def create_user():
     db.session.commit()
     return success_response(new_user.serialize(), 201)
 
-@app.route("/api/users/<int:id>/")
+
+@app.route("/api/users/<int:id>/", methods=['GET'])
 def get_user(id):
     user = User.query.filter_by(id = id).first()
     if user is None:
         return failure_response("User not found!")
     return success_response(user.serialize2())
 
-@app.route("/api/users/<int:id>/send/")
+
+@app.route("/api/users/<int:id>/send/", methods=['POST'])
 def send_friend_request(id):
     user = User.query.filter_by(id = id).first()
     if user is None:
         return failure_response("User not found!")
     body = json.loads(request.data)
     friend_id = body.get("friend_id")
-    catagory = body.get("catagory") #sender's
-    if friend_id or catagory is None:
+    if friend_id is None:
         return failure_response("Invalid field!")
     friend = User.query.filer_by(id = friend_id).first()
     if friend is None:
         return failure_response("User not found!")
 
-    new_request = Friend(sender_id = id, receiver_id = friend_id, sender_catagory = catagory, accepted = "false")
+    new_request = Friend_request(sender_id = id, receiver_id = friend_id, accepted = "false")
     db.session.add(new_request)
+
+    user.sent_request.append(new_request)
+    friend.received_request.append(new_request)
+
     db.session.commit()
     return success_response(new_request.serialize(), 201)
 
-@app.route("/api/users/<int:id>/receive/")
-def receive_friend_request(id):
-    request = Friend.query.filter_by(id = id).first()
+
+@app.route("/api/requests/<int:request_id>/", methods=['GET'])
+def get_friend_request(request_id):
+    request = Friend_request.query.filter_by(id = request_id).first()
     if request is None:
         return failure_response("Request not found!")
+    return success_response(request.serialize(), 201)
+
+
+@app.route("/api/users/<int:id>/receive/", methods=['POST'])
+def receive_friend_request(id):
+    receiver = User.query.filter_by(id = id).first()
+    if receiver is None:
+        return failure_response("User not found!")
     body = json.loads(request.data)
-    sender_id = body.get("sender_id")
-    receiver_id = body.get("receiver_id")
-    catagory = body.get("catagory") #receiver's
+    request_id = body.get("request_id")
     accepted = body.get("accepted")
-    if sender_id or receiver_id is None:
-        return failure_response("Invalid field!")
-    sender = User.query.filer_by(id = sender_id).first()
-    receiver = User.query.filer_by(id = receiver_id).first()
-    if sender or receiver is None:
+    request = Friend_request.query.filter_by(id = request_id).first()
+    if request is None:
+        return failure_response("Request not found!")
+    
+    sender = User.query.filer_by(id = request.sender_id).first()
+    if sender is None:
         return failure_response("User not found!")
     if accepted is not "true" or "false":
         return failure_response("Invalid field!")
     
     if accepted is "true":
         request.accepted = "true"
-        request.receiver_catagory = catagory
-        sender.sent_request.append(request)
-        receiver.received_request.append(request)
+        new_friend_to_sender = Friend(me_id = request.sender_id, friend_id = id)
+        new_friend_to_receiver = Friend(me_id = id, friend_id = request.sender_id)
+        db.session.add(new_friend_to_sender)
+        db.session.add(new_friend_to_receiver)
+        sender.friend.append(new_friend_to_sender)
+        receiver.friend.append(new_friend_to_receiver)
+    
+    receiver.received_request.append(request)
 
     db.session.commit()
     return success_response(request.serialize(), 201)
+
+
+@app.route("/api/requests/<int:user_id>/", methods=['DELETE'])
+def delete_friend(user_id):
+    user = User.query.filter_by(id = id).first()
+    if user is None:
+        return failure_response("User not found!")
+    body = json.loads(request.data)
+    friend_table_id = body.get("friend_table_id")
+    if friend_table_id is None:
+        return failure_response("Invalid field!")
+    friend_table = Friend.query.filer_by(id = friend_table_id).first()
+    if friend_table is None:
+        return failure_response("Friend not found!")
+    friend = User.query.filter_by(id = friend_table.friend_id).first()
+    if friend is None:
+        return failure_response("User not found!")
+
+    user.friend.remove(friend_table)
+    db.session.delete(friend_table)
+    db.session.commit()
+    return success_response(user.serialize(), 201)
+
 
 # ----------- EVENT ROUTES -------------------------------------------------------------------
 
@@ -112,7 +153,7 @@ def create_event(user_id):
     
     if title is None or location is None or time is None or description is None:
         return failure_response("Invalid field!")
-    new_event = Event(title = title, location = location, time = time, descrption = descrition, publicity = publicity)
+    new_event = Event(title = title, location = location, time = time, descrption = descrition, publicity = publicity, tag = tag)
     db.session.add(new_event)
 
     new_event.creator.append(creator)
@@ -121,6 +162,26 @@ def create_event(user_id):
     db.session.commit()
     return success_response(new_event.serialize(), 201)
 
+
+@app.route("/api/event/<int:event_id>/", methods=['POST'])
+def interest_event(event_id):
+    event = Event.query.filter_by(id = event_id).first()
+    if event is None:
+        return failure_response("Event not found!")
+    body = json.loads(request.data)
+    user_id = body.get("user_id")
+    if user_id is None:
+        return failure_response("Invalid field!")
+    user = User.query.filter_by(id = user_id).first()
+    if user is None:
+        return failure_response("User not found!")
+    if event is in user.event_interested or user is in event.attender:
+        return failure_response("You have already shown interest to this event!")
+    user.event_interested.append(event)
+    event.attender.append(user)
+    db.session.commit()
+    return success_response(user.serialize())
+    
 
 @app.route("/api/events/<int:event_id>/", methods=["DELETE"])
 def delete_event(event_id): 
@@ -136,11 +197,9 @@ def delete_event(event_id):
         return failure_response("User not found!")
     if event is not in user.event_created or user is not event.creator:
         return failure_response("You have no right to delete this event!")
-    if password is not user.password:
-        return failure_response("Please recheck the password!")
     db.session.delete(event)
     db.session.commit()
-    return success_response(course.serialize())
+    return success_response(event.serialize())
 
 
 @app.route("/api/event/<int:event_id>/", methods=["DELETE"])
@@ -160,7 +219,7 @@ def delete_interested_event(event_id):
     user.event_interested.remove(event)
     
     db.session.commit()
-    return success_response(user.serialize2())
+    return success_response(user.serialize())
 
 
 #still working on publicity
