@@ -50,6 +50,11 @@ def get_user(id):
         return failure_response("User not found!")
     return success_response(user.serialize())
 
+@app.route("/api/friends/<int:id>/", methods=['GET'])
+def get_friends(id):
+    user = User.query.filter_by(id = id).first()
+    
+    return success_response([friend.serialize() for friend in user.friend])
 
 @app.route("/api/users/<int:id>/send/", methods=['POST'])
 def send_friend_request(id):
@@ -63,6 +68,8 @@ def send_friend_request(id):
     friend = User.query.filter_by(id = friend_id).first()
     if friend is None:
         return failure_response("User not found!")
+    if friend in user.friend:
+        return failure_response("You are already friends!")
 
     new_request = Friend_request(sender_id = str(id), receiver_id = friend_id, accepted = "false")
     db.session.add(new_request)
@@ -98,6 +105,8 @@ def receive_friend_request(id):
     sender = User.query.filter_by(id = the_request.sender_id).first()
     if sender is None:
         return failure_response("User not found!")
+    if receiver in sender.friend:
+        return failure_response("You are already friends!")
     if accepted not in ("true", "false"):
         return failure_response("Invalid field!")
     
@@ -168,19 +177,19 @@ def create_event(user_id):
     return success_response(new_event.serialize(), 201)
 
 
-@app.route("/api/event/<int:event_id>/", methods=['POST'])
+@app.route("/api/interestevent/<int:event_id>/", methods=['POST'])
 def interest_event(event_id):
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
         return failure_response("Event not found!")
     body = json.loads(request.data)
-    user_id = body.get(user_id)
+    user_id = body.get("user_id")
     if user_id is None:
         return failure_response("Invalid field!")
-    user = User.query.filter_by(id = int(user_id)).first()
+    user = User.query.filter_by(id = user_id).first()
     if user is None:
         return failure_response("User not found!")
-    if event in user.event_interested or user in event.attender:
+    if event in user.event_interested:
         return failure_response("You have already shown interest to this event!")
     user.event_interested.append(event)
     event.attender.append(user)
@@ -235,21 +244,29 @@ def get_all_events():
     response = []
     for e in Event.query.all():
         if e.publicity is True:
-            response.append(e.serialize())
+            response += e.serialize()
         #what if the initiator wants to let all friends to view the event?
         elif e.publicity is False:
             if Friend.query.filter_by(me_id = e.creator.id, friend_id = user).first() is not None:
                 response.append(e.serialize())
-            
-    return success_response([c.serialize() for c in response])
+    
+    return success_response(response)
 
 @app.route("/api/events/<int:event_id>/")
 def get_event(event_id): 
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
         return failure_response("Event not found!")
+    if e.publicity is 0:
+            if Friend.query.filter_by(me_id = e.creator.id, friend_id = user).first() is None:
+                return failure_response("you have no access")
     
     return success_response(event.serialize())
+
+
+
+    
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
