@@ -52,7 +52,7 @@ class Event(db.Model):
     location = db.Column(db.String, nullable=False)
     time = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
-    publicity = db.Column(db.String, nullable=False)
+    publicity = db.Column(db.Boolean, nullable=False)
     tag = db.relationship('Tag', secondary=association_table_3, back_populates='event')
     creator = db.relationship('User', secondary=association_table_1, back_populates='event_created')
     attender = db.relationship('User', secondary=association_table_2, back_populates='event_interested')
@@ -62,7 +62,7 @@ class Event(db.Model):
         self.location = kwargs.get('location', '') #string, a field to fill in location
         self.time = kwargs.get('time', '') #long string contain date and time, slide buttons for date and time on app
         self.description = kwargs.get('description', '') #string, a field to fill in description
-        self.publicity = kwargs.get('publicity', '') #string, multiple choice:'show to all', 'show only to friends', 'show only to group of friends'
+        self.publicity = kwargs.get('publicity', '') #boolean, False = show only to friends', True = show to all
 
     def serialize(self):
         return{
@@ -105,16 +105,15 @@ class User(db.Model):
     event_interested = db.relationship('Event', secondary=association_table_2, back_populates='attender')
     sent_request = db.relationship('Friend_request', secondary=association_table_4, back_populates='sender_id')
     received_request = db.relationship('Friend_request', secondary=association_table_5, back_populates='receiver_id')
-    friend = db.relationship('Friend', secondary=association_table_6, back_populates='user_id')
-    x = 0
+    friend = db.relationship('Friend', secondary=association_table_6, back_populates='me_id')
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '') #string
         self.netid = kwargs.get('netid', '') #string
         self.password = kwargs.get('password', '') #string
         self.social_account = kwargs.get('social_account', '') #string
-    
-    
+        
+            
     def serialize(self): 
         event_created = []
         event_interested = []
@@ -144,16 +143,18 @@ class User(db.Model):
 
 
 class Friend_request(db.Model):
-        __tablename__ = 'friend_request'
-        id = db.Column(db.Integer, primary_key=True)
-        sender_id = db.relationship('User', secondary=association_table_4, back_populates='sent_request')
-        receiver_id = db.relationship('User', secondary=association_table_5, back_populates='received_request')
-        accepted = db.Column(db.String)
+    __tablename__ = 'friend_request'
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.relationship('User', secondary=association_table_4, back_populates='sent_request')
+    receiver_id = db.relationship('User', secondary=association_table_5, back_populates='received_request')
+    accepted = db.Column(db.Boolean)
     
     def __init__(self, **kwargs):
-        self.sender_id = kwargs.get('sender_id', '') # string, sender's id
-        self.receiver_id = kwargs.get('receiver_id', '') # string, receiver's id
+        self.sender_id = kwargs.get('sender_id', '')
+        self.receiver_id = kwargs.get('receiver_id', '')
         self.accepted = kwargs.get('accepted', '')
+
+
 
     def serialize(self):
         return{
@@ -167,7 +168,7 @@ class Friend_request(db.Model):
 class Friend(db.Model):
     __tablename__ = 'friend'
     id = db.Column(db.Integer, primary_key=True)
-    me_id = db.relationship('User', secondary=association_table_4, back_populates='friend')
+    me_id = db.relationship('User', secondary=association_table_6, back_populates='friend')
     friend_id = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
@@ -179,6 +180,3 @@ class Friend(db.Model):
             'id': self.id,
             'friend_id': self.friend_id
         }
-
-
-    
