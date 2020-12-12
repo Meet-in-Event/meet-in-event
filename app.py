@@ -1,6 +1,7 @@
 from db import db
-from db import Event, Tag, User, Friend
+from db import Event, Tag, User, Friend, Friend_request
 from flask import Flask, request
+
 import json
 import os
 
@@ -24,7 +25,7 @@ def failure_response(message, code = 404):
 
 # ----------- USER ROUTES -------------------------------------------------------------------
 
-# Update for all the fields
+# TODO: Function for updating for all the fields
 
 @app.route("/api/users/", methods=['POST'])
 def create_user():
@@ -32,10 +33,11 @@ def create_user():
     n = body.get("name")
     nid = body.get("netid")
     scct = body.get("social_account")
-    if nid is None or n is None or scct is None:
+    pswd = body.get("password")
+    if nid is None or n is None or scct is None or pswd is None:
         return failure_response("Invalid field!")
     
-    new_user = User(netid = nid, name = n, social_account = scct)
+    new_user = User(name = n, netid = nid, social_account = scct, password = pswd)
     db.session.add(new_user)
     db.session.commit()
     return success_response(new_user.serialize(), 201)
@@ -175,7 +177,7 @@ def interest_event(event_id):
     user = User.query.filter_by(id = user_id).first()
     if user is None:
         return failure_response("User not found!")
-    if event is in user.event_interested or user is in event.attender:
+    if event in user.event_interested or user in event.attender:
         return failure_response("You have already shown interest to this event!")
     user.event_interested.append(event)
     event.attender.append(user)
@@ -195,7 +197,7 @@ def delete_event(event_id):
     user = User.query.filter_by(id = user_id).first()
     if user is None:
         return failure_response("User not found!")
-    if event is not in user.event_created or user is not event.creator:
+    if event not in user.event_created or user is not event.creator:
         return failure_response("You have no right to delete this event!")
     db.session.delete(event)
     db.session.commit()
@@ -229,18 +231,13 @@ def get_all_events():
     user = body.get("user_id")
     response = []
     for e in Event.query.all():
-        if e.publicity is None:
+        if e.publicity is True:
             response.append(e.serialize())
         #what if the initiator wants to let all friends to view the event?
-        elif e.publicity == "All":
-            if Friend.query.filter_by(sender_id = e.creator.id, receiver_id = user).first() is not None or Friend.query.filter_by(sender_id = user, receiver_id = e.creator.id).first() is not None: 
+        elif e.publicity is False:
+            if Friend.query.filter_by(me_id = e.creator.id, friend_id = user).first() is not None:
                 response.append(e.serialize())
-        else:
-            if Friend.query.filter_by(sender_id = e.creator.id, receiver_id = user,sender_catagory = category).first() is not None or Friend.query.filter_by(sender_id = user, receiver_id = e.creator.id, receiver_catagory = category).first() is not None: 
             
-                #just finished the friends' methods, next step: make a whole list of friends
-                response.append(e.serialize())
-
     return success_response([c.serialize() for c in response])
 
 @app.route("/api/courses/<int:event_id>/")
