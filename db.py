@@ -73,8 +73,8 @@ class Event(db.Model):
             "description": self.description,
             "publicity": self.publicity,
             "tag": [s.serialize() for s in self.tag],
-            "creator": [s.serialize() for s in self.creator],
-            "attender": [s.serialize() for s in self.attender]
+            "creator": [s.serialize_for_event() for s in self.creator],
+            "attender": [s.serialize_for_event() for s in self.attender]
         }
 
 
@@ -117,23 +117,16 @@ class User(db.Model):
     
     def serialize(self): 
         event_created = []
-        event_interested = []
-        for i in self.event_created:
-            event_created += {
-                "id": i.id,
-                "title": i.title,
-                "location": i.location,
-                "time": i.time,
-                "description": i.description,
-            }
-        for i in self.event_interested:
-            event_interested += {
-                "id": i.id,
-                "title": i.title,
-                "location": i.location,
-                "time": i.time,
-                "description": i.description,
-            }
+        event_interested =[]
+        
+        if(self.event_created is not None):
+            event_created = [i.serialize() for i in self.event_created]
+        
+        if(self.event_interested is not None):
+            event_interested = [i.serialize() for i in self.event_interested]
+
+        
+        
         return{
             "id": self.id,
             "name": self.name,
@@ -143,6 +136,14 @@ class User(db.Model):
             "event_interested": event_interested
         }
 
+    def serialize_for_event(self):
+        return{
+            "id": self.id,
+            "name": self.name,
+            "netid": self.netid,
+            "social_account": self.social_account
+            }
+      
 
 class Friend_request(db.Model):
     __tablename__ = "friend_request"
