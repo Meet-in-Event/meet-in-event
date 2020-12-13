@@ -43,9 +43,9 @@ def create_user():
     return success_response(new_user.serialize(), 201)
 
 
-@app.route("/api/users/<int:id>/", methods=['GET'])
-def get_user(id):
-    user = User.query.filter_by(id = id).first()
+@app.route("/api/users/<int:net_id>/", methods=['GET'])
+def get_user(net_id):
+    user = User.query.filter_by(net_id = net_id).first()
     if user is None:
         return failure_response("User not found!")
     return success_response(user.serialize())
