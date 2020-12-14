@@ -43,17 +43,16 @@ class FilterCollectionViewCell: UICollectionViewCell {
             }
         }
         
-        func configure(for filter: Tag) {
+    func configure(for filter: Tag, color1: UIColor, color2: UIColor) {
             filterLabel.text = filter.tag
            // filterLabel.textAlignment = .center
             if(filter.isOn)
             {
-                contentView.backgroundColor = UIColor(red: 253/255.0, green: 120/255.0, blue: 200/255.0, alpha: 1
-                )
+                contentView.backgroundColor = color2
                 filterLabel.textColor = .white
             }
             else{
-                contentView.backgroundColor = eventColor
+                contentView.backgroundColor = color1
                 filterLabel.textColor = .black
             }
             

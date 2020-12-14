@@ -258,7 +258,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
                        }
         
         error.snp.makeConstraints{make in
-            make.top.equalTo(category.snp.bottom).offset(offset)
+            make.top.equalTo(category.snp.bottom).offset(15)
             make.centerX.equalToSuperview()
         }
         
@@ -309,7 +309,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         let suf: String = dateFormatter.string(from: sender.date)
         print(suf)
 
-        date = Date(year: yearInt, mon: monthInt, day: dayInt, hour: hourInt, min: minInt, suf: suf)
+        date = Date(year: yearInt, mon: monthInt-1, day: dayInt, hour: hourInt, min: minInt, suf: suf)
 //        let Index1 = selectedDate.index(selectedDate.startIndex, offsetBy: 0)
 //        let Index2 = selectedDate.index(selectedDate.startIndex, offsetBy: 1)
 //        print(selectedDate[Index2]+selectedDate[Index2])
@@ -335,6 +335,10 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
                     l.append(i)
                 }
             }
+            print(l)
+            if self.date == nil {
+                self.date = Date(year: 20, mon: 0, day: 1, hour: 1, min: 1, suf: "AM")
+            }
             event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: self.date, creator: user, location: locationField.text!, tags: l)
             NetworkManager.createEvent(e: event, user: self.user) { ev in
                 self.event.id = ev.id
@@ -343,6 +347,9 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             eventNameField.text=""
             descriptionField.text=""
             locationField.text=""
+            for i in filters {
+                i.isOn = false
+            }
             self.delegate?.home()
             }
         
@@ -391,7 +398,8 @@ extension AddPage: UICollectionViewDataSource {
     
                  let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                      
-           cell.configure(for: filters[indexPath.item])
+        cell.configure(for: filters[indexPath.item], color1: textFieldColor, color2: UIColor(red: 255/255.0, green: 175/255.0, blue: 97/255.0, alpha: 1))
+     //   cell.contentView.backgroundColor = textFieldColor
                  return cell
     
 }

@@ -325,7 +325,7 @@ extension ViewController: UITabBarControllerDelegate{
             profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.cyan)
             eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.white)
             addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.white)
-            editButton()
+           // editButton()
             navigationItem.leftBarButtonItem = nil
         }
         
@@ -557,6 +557,7 @@ extension ViewController: Events, Add, Profile, Login {
     func addEvent(i: Event) {
       //  NetworkManager.createEvent(e: i, user: self.user)
         events.append(i)
+        allEvents.append(i)
         sortByDate()
 
         eventPage.events=events
@@ -565,6 +566,8 @@ extension ViewController: Events, Add, Profile, Login {
         user.eventCreated?.append(i)
         
         eventPage.eventCollectionView.reloadData()
+        
+        starButtonSetup()
     }
     
     func home() {

@@ -148,7 +148,7 @@ extension EventPage: UICollectionViewDataSource {
         if(collectionView == filterCV){
                  let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                      
-           cell.configure(for: filters[indexPath.item])
+            cell.configure(for: filters[indexPath.item], color1: eventColor, color2: UIColor(red: 253/255.0, green: 120/255.0, blue: 200/255.0, alpha: 1))
                  return cell
              }
              else{

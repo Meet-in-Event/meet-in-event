@@ -129,10 +129,10 @@ class Date: Codable {
     func getTimeStamp() -> Int {
         //year?
         if self.suf == "AM" {
-            return self.mon*1000000 + self.day*10000 + self.hour*100 + self.min
+            return (self.mon+1)*1000000 + self.day*10000 + self.hour*100 + self.min
         }
         else {
-            return self.mon*1000000 + self.day*10000 + (self.hour+12)*100 + self.min
+            return (self.mon+1)*1000000 + self.day*10000 + (self.hour+12)*100 + self.min
         }
     }
     
@@ -150,10 +150,10 @@ class Date: Codable {
         time-=100*hour
         min = time
         if hour>12 {
-            return (Date(year: 21, mon: mon, day: day, hour: hour-12, min: min, suf: "PM"))
+            return (Date(year: 21, mon: mon-1, day: day, hour: hour-12, min: min, suf: "PM"))
         }
         else {
-            return (Date(year: 21, mon: mon, day: day, hour: hour, min: min, suf: "AM"))
+            return (Date(year: 21, mon: mon-1, day: day, hour: hour, min: min, suf: "AM"))
         }
     }
     

@@ -88,6 +88,7 @@ class NetworkManager {
             "Tags": e.getTags()
 
         ]
+        print(parameters)
         let endpoint = "\(host)/api/event/\(user.netid)/"
         AF.request(endpoint, method: .post, parameters: parameters, encoding: JSONEncoding.default).validate().responseData { response in
             switch response.result {
@@ -98,9 +99,6 @@ class NetworkManager {
                     completion(eventData)
                 }
             
-            
-            /////////////////
-            //make sure to set the event id
             case .failure(let error):
                 print(error.localizedDescription)
             }
