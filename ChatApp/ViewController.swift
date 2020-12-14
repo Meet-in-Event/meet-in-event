@@ -553,7 +553,7 @@ extension ViewController: Events, Add, Profile, Login {
     }
     
     func addEvent(i: Event) {
-        NetworkManager.createEvent(e: i, user: self.user)
+      //  NetworkManager.createEvent(e: i, user: self.user)
         events.append(i)
         sortByDate()
 

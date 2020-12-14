@@ -16,8 +16,8 @@ struct Event2: Codable {
     let time: Int
     let description: String
     let publicity: Bool
-    let people: [User2]
-    let creator: User2
+    let people: [User]
+    let creator: User
     let tag: [String]
     let id: Int
 }
@@ -54,35 +54,21 @@ struct Event: Codable {
         //turn this into a date object
         //self.date = event2.time
       //  self.people = event2.people
-        var l: [User] = []
-        for i in event2.people {
-            l.append(User(user2: i))
-        }
-        self.people = l
-        self.creator = User(user2: event2.creator)
+//        var l: [User] = []
+//        for i in event2.people {
+//            l.append(User(user2: i))
+//        }
+        self.people = event2.people
+     //   self.people = l
+       // self.creator = User(user2: event2.creator)
+        self.creator = event2.creator
         self.location = event2.location
         self.publ = event2.publicity
         self.image = "blank"
         self.id = event2.id
         
-        var time = event2.time
-        var mon = 0
-        var day = 0
-        var hour = 0
-        var min = 0
-        mon = time/1000000
-        time-=1000000*mon
-        day = time/10000
-        time-=10000*day
-        hour = time/100
-        time-=100*hour
-        min = time
-        if hour>12 {
-            self.date = Date(year: 21, mon: mon, day: day, hour: hour-12, min: min, suf: "PM")
-        }
-        else {
-            self.date = Date(year: 21, mon: mon, day: day, hour: hour, min: min, suf: "AM")
-        }
+        self.date = Date.decodeTimeStamp(i: event2.time)
+        
     }
     
     func getTags() -> [String] {
@@ -99,6 +85,9 @@ struct Event: Codable {
         }
         return "False"
     }
+    
+    
+    
     
     
 }
@@ -139,6 +128,29 @@ class Date: Codable {
             return self.mon*1000000 + self.day*10000 + (self.hour+12)*100 + self.min
         }
     }
+    
+    static func decodeTimeStamp(i: Int) -> Date {
+        var time = i
+        var mon = 0
+        var day = 0
+        var hour = 0
+        var min = 0
+        mon = time/1000000
+        time-=1000000*mon
+        day = time/10000
+        time-=10000*day
+        hour = time/100
+        time-=100*hour
+        min = time
+        if hour>12 {
+            return (Date(year: 21, mon: mon, day: day, hour: hour-12, min: min, suf: "PM"))
+        }
+        else {
+            return (Date(year: 21, mon: mon, day: day, hour: hour, min: min, suf: "AM"))
+        }
+    }
+    
+    
     
     func lessthan(other: Date) -> Bool {
         if self.year==other.year {

@@ -17,7 +17,8 @@ struct User2: Codable {
     let socialAccount: String
     let eventCreated: [Event]
     let eventInterested: [Event]
-    let password: String
+    let friend: [User]
+  //  let password: String
 }
 
 
@@ -50,14 +51,18 @@ struct User: Codable {
     init(user2: User2) {
         self.netid = user2.netid
         self.name = user2.name
-        self.password = user2.password
+       // self.password = user2.password
     //    self.image = image
         self.friends = []
-        self.eventInterested = user2.eventInterested
+     //   self.eventInterested = user2.eventInterested
         self.favs = []
-        self.eventCreated = user2.eventCreated
+      //  self.eventCreated = user2.eventCreated
         self.socialAccount = user2.socialAccount
         self.id = user2.id
+        
+        self.eventCreated = []
+        self.eventInterested = []
+        self.password = "pass"
     }
     
 

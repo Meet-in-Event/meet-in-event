@@ -32,6 +32,7 @@ class NetworkManager {
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 if let userData = try? jsonDecoder.decode(UserDataResponse.self, from: data) {
                   //  print(userData.data)
+                    print("creating user")
                     completion(userData.data, u)
                     
                 }
@@ -42,13 +43,15 @@ class NetworkManager {
     }
     
     static func getUser(netid: String, completion: @escaping (User2) -> Void) {
-        let endpoint = "\(host)/api/event/\(netid)/"
+        let endpoint = "\(host)/api/users/\(netid)/"
         AF.request(endpoint, method: .get).validate().responseData { response in
             switch response.result {
             case .success(let data):
+                print(String(decoding: data, as: UTF8.self))
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 if let userData = try? jsonDecoder.decode(UserDataResponse.self, from: data) {
+                    print("getting user")
                     completion(userData.data)
                 }
             case .failure(let error):
@@ -59,13 +62,14 @@ class NetworkManager {
     
     
     static func getEvents(completion: @escaping ([Event2]) -> Void) {
-        let endpoint = "\(host)/api/event/"
+        let endpoint = "\(host)/api/events/"
         AF.request(endpoint, method: .get).validate().responseData { response in
             switch response.result {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
+                    print("getting all events")
                     completion(eventsData.events)
                 }
             case .failure(let error):
