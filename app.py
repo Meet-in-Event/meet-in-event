@@ -92,7 +92,7 @@ def get_friend_request(netid):
     user = User.query.filter_by(netid = netid).first()
     if user is None:
         return failure_response("User not found!")
-    return success_response(user.received_request.serialize(), 201)
+    return success_response([request.serialize() for request in user.received_request], 201)
 
 
 @app.route("/api/users/<netid>/receive/", methods=['POST'])
