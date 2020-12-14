@@ -13,7 +13,7 @@ association_table_2 = db.Table(
     "association2",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"))
+    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_3 = db.Table(
@@ -27,21 +27,21 @@ association_table_4 = db.Table(
     "association4",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("sender", db.Integer, db.ForeignKey("user.id"))
+    db.Column("sender_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_5 = db.Table(
     "association5",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("receiver", db.Integer, db.ForeignKey("user.id"))
+    db.Column("receiver_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_6 = db.Table(
     "association6",
     db.Model.metadata,
-    db.Column("friend", db.Integer, db.ForeignKey("friend.friend_id")),
-    db.Column("me", db.Integer, db.ForeignKey("user.id"))
+    db.Column("friend_netid", db.Integer, db.ForeignKey("friend.friend_netid")),
+    db.Column("me_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 
@@ -155,8 +155,8 @@ class Friend_request(db.Model):
     accepted = db.Column(db.String)
     
     def __init__(self, **kwargs):
-        self.sender_id = kwargs.get("sender_id", "") # string, sender"s id
-        self.receiver_id = kwargs.get("receiver_id", "") # string, receiver"s id
+        self.sender_netid = kwargs.get("sender_netid", "") # string, sender"s id
+        self.receiver_netid = kwargs.get("receiver_netid", "") # string, receiver"s id
         self.accepted = kwargs.get("accepted", "")
 
     def serialize(self):
