@@ -148,8 +148,8 @@ class User(db.Model):
 class Friend_request(db.Model):
     __tablename__ = "friend_request"
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
+    sender_netid = db.Column(db.Integer, nullable=False)
+    receiver_netid = db.Column(db.Integer, nullable=False)
     sender = db.relationship("User", secondary=association_table_4, back_populates="sent_request")
     receiver = db.relationship("User", secondary=association_table_5, back_populates="received_request")
     accepted = db.Column(db.String)
@@ -162,8 +162,8 @@ class Friend_request(db.Model):
     def serialize(self):
         return{
             "id": self.id,
-            "sender_id": self.sender_id,
-            "receiver_id": self.receiver_id,
+            "sender_netid": self.sender_netid,
+            "receiver_netid": self.receiver_netid,
             "accepted": self.accepted
         }
     
@@ -172,15 +172,15 @@ class Friend(db.Model):
     __tablename__ = "friend"
     id = db.Column(db.Integer, primary_key=True)
     me = db.relationship("User", secondary=association_table_6, back_populates="friend")
-    me_id = db.Column(db.String, nullable=False)
-    friend_id = db.Column(db.String, nullable=False)
+    me_netid = db.Column(db.String, nullable=False)
+    friend_netid = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
-        self.me_id = kwargs.get("me_id", "")
-        self.friend_id = kwargs.get("friend_id", "")
+        self.me_netid = kwargs.get("me_netid", "")
+        self.friend_netid = kwargs.get("friend_netid", "")
     
     def serialize(self):
         return{
             "id": self.id,
-            "friend_id": self.friend_id
+            "friend_netid": self.friend_netid
         }
