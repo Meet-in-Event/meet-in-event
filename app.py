@@ -51,20 +51,20 @@ def get_user(netid):
     return success_response(user.serialize())
 
 
-@app.route("/api/users/<int:id>/send/", methods=['POST'])
-def send_friend_request(id):
-    user = User.query.filter_by(id = id).first()
+@app.route("/api/users/<int:netid>/send/", methods=['POST'])
+def send_friend_request(netid):
+    user = User.query.filter_by(netid = netid).first()
     if user is None:
         return failure_response("User not found!")
     body = json.loads(request.data)
-    friend_id = body.get("friend_id")
-    if friend_id is None:
+    friend_netid = body.get("friend_netid")
+    if friend_netid is None:
         return failure_response("Invalid field!")
-    friend = User.query.filter_by(id = friend_id).first()
+    friend = User.query.filter_by(netid = friend_netid).first()
     if friend is None:
         return failure_response("User not found!")
 
-    new_request = Friend_request(sender_id = str(id), receiver_id = friend_id, accepted = "false")
+    new_request = Friend_request(sender_netid = str(netid), receiver_netid = friend_netid, accepted = "false")
     db.session.add(new_request)
     new_request.sender.append(user)
     new_request.receiver.append(friend)
@@ -75,17 +75,17 @@ def send_friend_request(id):
     return success_response(new_request.serialize(), 201)
 
 
-@app.route("/api/requests/<int:request_id>/", methods=['GET'])
-def get_friend_request(request_id):
-    request = Friend_request.query.filter_by(id = request_id).first()
-    if request is None:
-        return failure_response("Request not found!")
-    return success_response(request.serialize(), 201)
+@app.route("/api/request/<int:netid>/", methods=['GET'])
+def get_friend_request(netid):
+    user = User.query.filter_by(netid = netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    return success_response(user.received_request.serialize(), 201)
 
 
-@app.route("/api/users/<int:id>/receive/", methods=['POST'])
-def receive_friend_request(id):
-    receiver = User.query.filter_by(id = id).first()
+@app.route("/api/users/<int:netid>/receive/", methods=['POST'])
+def receive_friend_request(netid):
+    receiver = User.query.filter_by(netid = netid).first()
     if receiver is None:
         return failure_response("User not found!")
     body = json.loads(request.data)
@@ -103,8 +103,8 @@ def receive_friend_request(id):
     
     if accepted == "true":
         the_request.accepted = "true"
-        new_friend_to_sender = Friend(me_id = sender_id, friend_id = str(id))
-        new_friend_to_receiver = Friend(me_id = str(id), friend_id = the_request.sender_id)
+        new_friend_to_sender = Friend(me_id = sender_id, friend_netid = str(id))
+        new_friend_to_receiver = Friend(me_id = str(id), friendnet_id = the_request.sender_id)
         new_friend_to_sender.me.append(sender)
         new_friend_to_receiver.me.append(receiver)
         db.session.add(new_friend_to_sender)
@@ -118,19 +118,19 @@ def receive_friend_request(id):
     return success_response(the_request.serialize(), 201)
 
 
-@app.route("/api/requests/<int:user_id>/", methods=['DELETE'])
-def delete_friend(user_id):
-    user = User.query.filter_by(id = id).first()
+@app.route("/api/friend/<int:user_netid>/", methods=['DELETE'])
+def delete_friend(user_netid):
+    user = User.query.filter_by(netid = user_netid).first()
     if user is None:
         return failure_response("User not found!")
     body = json.loads(request.data)
-    friend_table_id = body.get("friend_table_id")
-    if friend_table_id is None:
+    friend_netid = body.get("netid")
+    if friend_netid is None:
         return failure_response("Invalid field!")
-    friend_table = Friend.query.filer_by(id = friend_table_id).first()
+    friend_table = Friend.query.filer_by(friend_netid = friend_netid).first()
     if friend_table is None:
         return failure_response("Friend not found!")
-    friend = User.query.filter_by(id = friend_table.friend_id).first()
+    friend = User.query.filter_by(netid = friend_table.friend_netid).first()
     if friend is None:
         return failure_response("User not found!")
 
@@ -185,19 +185,19 @@ def create_tag():
     return success_response(new_tag.serialize(), 201)
 
 
-@app.route("/api/event/<int:event_id>/", methods=['POST'])
+@app.route("/api/interestevent/<int:event_id>/", methods=['POST'])
 def interest_event(event_id):
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
         return failure_response("Event not found!")
     body = json.loads(request.data)
-    user_id = body.get(user_id)
+    user_id = body.get("user_id")
     if user_id is None:
         return failure_response("Invalid field!")
-    user = User.query.filter_by(id = int(user_id)).first()
+    user = User.query.filter_by(id = user_id).first()
     if user is None:
         return failure_response("User not found!")
-    if event in user.event_interested or user in event.attender:
+    if event in user.event_interested:
         return failure_response("You have already shown interest to this event!")
     user.event_interested.append(event)
     event.attender.append(user)
@@ -243,16 +243,15 @@ def delete_interested_event(event_id):
     db.session.commit()
     return success_response(user.serialize())
 
-
 @app.route("/api/events/")
 def get_all_events():            
     return success_response([t.serialize() for t in Event.query.all()])
 
 
 #still working on publicity
-@app.route("/api/events/<int:user_id>/")
-def get_all_events_for_user(user_id):
-    user = User.query.filter_by(id = id).first()
+@app.route("/api/events/<int:user_netid>/")
+def get_all_events_for_user(user_netid):
+    user = User.query.filter_by(netid = user_netid).first()
     if user is None:
         return failure_response("User not found!")
     
@@ -262,16 +261,19 @@ def get_all_events_for_user(user_id):
             response.append(e.serialize())
         #what if the initiator wants to let all friends to view the event?
         elif e.publicity is False:
-            if Friend.query.filter_by(me_id = e.creator.id, friend_id = user_id).first() is not None:
-                response.append(e.serialize())            
+            if Friend.query.filter_by(me_netid = e.creator.netid, friend_netid = user_netid).first() is not None:
+                response.append(e.serialize())
+            
     return success_response([c.serialize() for c in response])
-
 
 @app.route("/api/events/<int:event_id>/")
 def get_event(event_id): 
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
         return failure_response("Event not found!")
+    if e.publicity is False:
+            if Friend.query.filter_by(me_netid = e.creator.netid, friend_netid = user).first() is None:
+                return failure_response("you have no access")
     
     return success_response(event.serialize())
 
