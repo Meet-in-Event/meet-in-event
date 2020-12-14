@@ -269,7 +269,7 @@ def delete_interested_event(event_id):
 def get_all_events():
     return success_response([t.serialize() for t in Event.query.all()])
 
-#still working on publicity
+
 @app.route("/api/events/<user_netid>/")
 def get_all_events_for_user(user_netid):
     user = User.query.filter_by(netid = user_netid).first()
@@ -290,6 +290,37 @@ def get_all_events_for_user(user_netid):
                         isFriend = True
             if isFriend == True:
                 response.append(e.serialize())
+            
+    return success_response(response)
+
+
+
+@app.route("/api/events/<user_netid>/tag/")
+def get_all_events_for_user_tag(user_netid):
+    body = json.loads(request.data)
+    tags = body.get("tag")
+
+    user = User.query.filter_by(netid = user_netid).first()
+    if user is None:
+        return failure_response("User not found!")   
+    response = []
+    for e in Event.query.all():
+        for t in tags:
+            tag_cur = Tag.query.filter_by(title = t).first()
+            if tag_cur in e.tag:
+                if e.publicity == "True":
+                    response.append(e.serialize())
+                #what if the initiator wants to let all friends to view the event?
+                elif e.publicity == "False":
+                    isFriend = False
+                    if user in e.creator:
+                        isFriend = True
+                    for f in user.friend:
+                        for c in e.creator:
+                            if f.friend_netid == c.netid:
+                                isFriend = True
+                    if isFriend == True:
+                        response.append(e.serialize())
             
     return success_response(response)
 
@@ -317,17 +348,6 @@ def get_event(event_id):
     
     return success_response(event.serialize())
 
-@app.route("/upload/", methods=["POST"])
-def upload():
-    body=json.loads(request.data)
-    image_data = body.get("image_data")
-    if image_data is None:
-        return failure_response("no base64 URL to be found")
-    
-    asset = Asset(image_data = image_data)
-    db.session.add(asset)
-    db.session.commit()
-    return success_response(asset.serialize(), 201)
 
     
 
