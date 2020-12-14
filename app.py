@@ -95,7 +95,7 @@ def receive_friend_request(netid):
     if the_request is None:
         return failure_response("Request not found!")
     
-    sender = User.query.filter_by(id = the_request.sender_id).first()
+    sender = User.query.filter_by(netid = the_request.sender_netid).first()
     if sender is None:
         return failure_response("User not found!")
     if accepted not in ("true", "false"):
@@ -103,8 +103,8 @@ def receive_friend_request(netid):
     
     if accepted == "true":
         the_request.accepted = "true"
-        new_friend_to_sender = Friend(me_id = sender_id, friend_netid = str(id))
-        new_friend_to_receiver = Friend(me_id = str(id), friendnet_id = the_request.sender_id)
+        new_friend_to_sender = Friend(me_netid = the_request.sender_netid, friend_netid = str(netid))
+        new_friend_to_receiver = Friend(me_netid = str(netid), friend_netid = the_request.sender_netid)
         new_friend_to_sender.me.append(sender)
         new_friend_to_receiver.me.append(receiver)
         db.session.add(new_friend_to_sender)
@@ -191,10 +191,10 @@ def interest_event(event_id):
     if event is None:
         return failure_response("Event not found!")
     body = json.loads(request.data)
-    user_id = body.get("user_id")
-    if user_id is None:
+    user_netid = body.get("user_netid")
+    if user_netid is None:
         return failure_response("Invalid field!")
-    user = User.query.filter_by(id = user_id).first()
+    user = User.query.filter_by(netid = user_netid).first()
     if user is None:
         return failure_response("User not found!")
     if event in user.event_interested:
@@ -211,10 +211,10 @@ def delete_event(event_id):
     if event is None:
         return failure_response("Event not found!")
     body = json.loads(request.data)
-    user_id = body.get("user_id")
-    if user_id is None:
+    user_netid = body.get("user_netid")
+    if user_netid is None:
         return failure_response("Invalid field!")
-    user = User.query.filter_by(id = user_id).first()
+    user = User.query.filter_by(netid = user_netid).first()
     if user is None:
         return failure_response("User not found!")
     if event not in user.event_created or user is not event.creator:
@@ -230,10 +230,10 @@ def delete_interested_event(event_id):
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
         return failure_response("Event not found!")
-    user_id=body.get("user_id")
+    user_netid= body.get("user_netid")
     if user_id is None:
         return failure_response("Invalid field!")
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(netid=user_netid).first()
     if user is None:
         return failure_response("User not found!")
     if event not in user.event_interested:
