@@ -19,42 +19,42 @@ S3_BASE_URL = f"https://{S3_BUCKET}.s3-us-east-2.amazonaws.com"
 
 
 association_table_1 = db.Table(
-    "association1",
+    "event_creator",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"))
+    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_2 = db.Table(
-    "association2",
+    "event_attendor",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
     db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_3 = db.Table(
-    "association3",
+    "event_tag",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
     db.Column("tag_id", db.Integer, db.ForeignKey("tag.id"))
 )
 
 association_table_4 = db.Table(
-    "association4",
+    "request_sender",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
     db.Column("sender_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_5 = db.Table(
-    "association5",
+    "request_receiver",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
     db.Column("receiver_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_6 = db.Table(
-    "association6",
+    "friend_me",
     db.Model.metadata,
     db.Column("friend_netid", db.Integer, db.ForeignKey("friend.friend_netid")),
     db.Column("me_netid", db.Integer, db.ForeignKey("user.netid"))
