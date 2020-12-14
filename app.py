@@ -343,7 +343,7 @@ def get_event(event_id):
             for c in event.creator:
                 if f.friend_netid == c.netid:
                     isFriend = True
-        if isFriend == True:
+        if isFriend == False:
             return failure_response("you have no access")
     
     return success_response(event.serialize())
