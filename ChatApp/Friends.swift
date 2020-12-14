@@ -8,6 +8,10 @@
 import UIKit
 import SnapKit
 
+protocol Friend {
+    func getColor(u: User) -> UIColor
+}
+
 class Friends: UIViewController {
     
     var tableView: UITableView!
@@ -34,6 +38,12 @@ class Friends: UIViewController {
         
         user = self.delegate?.getUser()
         self.friends = user.friends
+        if let f = delegate?.getRequest() {
+            for i in f {
+                self.friends.append(i)
+            }
+        }
+    
         
         tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -41,6 +51,7 @@ class Friends: UIViewController {
         tableView.delegate = self
         tableView.register(FriendTableViewCell.self, forCellReuseIdentifier: reuseIdentifier)
         tableView.backgroundColor = backColor
+        tableView.delegate = self
         view.addSubview(tableView)
         
 
@@ -81,10 +92,18 @@ extension Friends: UITableViewDelegate {
 
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        currentFriend = friends[indexPath.row]
+        currentFriend = friends[indexPath.row]
 //        currentIndex = indexPath.row
-    //    let cell = tableView.cellForRow(at: indexPath) as! FriendTableViewCell
-    //    cell.backgroundColor = eventColor
+        let cell = tableView.cellForRow(at: indexPath) as! FriendTableViewCell
+        if let f = delegate?.getRequest() {
+            for i in f {
+                if i.netid==currentFriend.netid {
+                    cell.backgroundColor = backColor
+                }
+            }
+        }
+        
+        
 //        currentCell = cell
         
 //        let newViewController = EditData()
@@ -102,6 +121,19 @@ extension Friends: UITableViewDelegate {
     }
     
 
+}
+
+extension Friends: Friend {
+    func getColor(u: User) -> UIColor {
+        if let f = delegate?.getRequest() {
+            for i in f {
+                if u.netid==i.netid {
+                    return .magenta
+                }
+            }
+        }
+        return backColor
+    }
 }
 
 

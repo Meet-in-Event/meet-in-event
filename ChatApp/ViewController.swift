@@ -43,6 +43,7 @@ protocol Profile: class {
     func getUser() -> User
     func removeFriend(i: Int)
     func pushNewView(viewController: UIViewController)
+    func getRequest() -> [User]
 }
 
 protocol Login: class {
@@ -51,6 +52,10 @@ protocol Login: class {
 }
 
 
+
+
+
+    
 class ViewController: UIViewController {
 
     var edit: UIBarButtonItem!
@@ -66,6 +71,8 @@ class ViewController: UIViewController {
     var events: [Event]!
     var allEvents: [Event]!
     
+    var requested: [User]!
+    
     
     var loginButton: UIButton!
     var signupButton: UIButton!
@@ -78,10 +85,10 @@ class ViewController: UIViewController {
         tapped=false
         
         
+        NetworkManager.getFriendRequest() {
         
-        
-
-        
+        }
+        //get the friend requests
         
         
         loginButton = UIButton()
@@ -120,7 +127,18 @@ class ViewController: UIViewController {
     func getAllEvents() {
         NetworkManager.getEvents() { events2 in
             for i in events2 {
-                self.events.append(Event(name: i.title, desc: i.description, date: i.time, creator: i.creator, location: i.location, people: i.people, publ: i.publicity))
+                if !(i.publicity) {
+                    if let f = self.user.friends {
+                        for j in f {
+                            if j.netid==i.creator.netid {
+                                self.events.append(Event(name: i.title, desc: i.description, date: i.time, creator: i.creator, location: i.location, people: i.people, publ: i.publicity))
+                            }
+                        }
+                    }
+                }
+                else {
+                    self.events.append(Event(name: i.title, desc: i.description, date: i.time, creator: i.creator, location: i.location, people: i.people, publ: i.publicity))
+                }
             }
     }
     }
@@ -551,6 +569,11 @@ extension ViewController: Events, Add, Profile, Login {
     
     func pop() {
         navigationController?.popViewController(animated: false)
+    }
+    
+    
+    func getRequest() -> [User] {
+        return requested
     }
  
 }

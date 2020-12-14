@@ -14,6 +14,8 @@ class FriendTableViewCell: UITableViewCell {
         
     var imageName: String!
     
+    weak var delegate: Friend?
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.backgroundColor = backColor
@@ -77,6 +79,8 @@ class FriendTableViewCell: UITableViewCell {
         nameLabel.text = friend.name
         socialLabel.text = friend.socialAccount
         profileImage.image = UIImage(named: "blankprofile")
+        
+        delegate?.getColor(u: friend)
 
     }
 }
