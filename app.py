@@ -250,7 +250,7 @@ def delete_interested_event(event_id):
     if event is None:
         return failure_response("Event not found!")
     user_netid= body.get("user_netid")
-    if user_id is None:
+    if user_netid is None:
         return failure_response("Invalid field!")
     user = User.query.filter_by(netid=user_netid).first()
     if user is None:
@@ -311,8 +311,6 @@ def upload():
 
     
 
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-   
