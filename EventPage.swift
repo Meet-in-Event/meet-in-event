@@ -19,10 +19,12 @@ protocol View: class {
     func removeFav(i: Event)
     func removeFromView(i: Event)
     func addToView(i: Event)
+    func deleteEvent(i: Event)
 }
 
 
 class EventPage: UIViewController {
+    var filterCV: UICollectionView!
     var eventCollectionView: UICollectionView!
     let eventCellReuseIdentifier = "eventCellReuseIdentifier"
     let padding: CGFloat = 8
@@ -34,7 +36,14 @@ class EventPage: UIViewController {
     
     
     
+    var filter1 = Tag(tag: "Sports")
+      var filter2 = Tag(tag: "Music")
+      var filter3 = Tag(tag: "Study Dates")
+    var filter4 = Tag(tag: "Outdoor Activities")
+    var filter5 = Tag(tag: "Shopping")
+    var filter6 = Tag(tag: "Other")
 
+    var filters: [Tag] = []
     var events: [Event]!
     var allEvents: [Event]!
     
@@ -43,17 +52,22 @@ class EventPage: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        view.backgroundColor=backColor
         
         allEvents = delegate?.getEvents()
         events = []
         for i in allEvents {
-            if i.people.count < i.max {
-                events.append(i)
-                print(i)
-            }
+            events.append(i)
         }
         
+        filters = [filter1, filter2, filter3, filter4, filter5, filter6]
+        
+        
+        let filterLayout = UICollectionViewFlowLayout()
+        filterLayout.scrollDirection = .horizontal
+        filterLayout.minimumInteritemSpacing = padding
+        filterLayout.minimumLineSpacing = 0
+              
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -64,9 +78,19 @@ class EventPage: UIViewController {
         eventCollectionView.register(EventCollectionViewCell.self, forCellWithReuseIdentifier: eventCellReuseIdentifier)
         eventCollectionView.dataSource = self
         eventCollectionView.delegate = self
+        eventCollectionView.backgroundColor = backColor
         eventCollectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(eventCollectionView)
         
+        
+        
+               filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
+               filterCV.backgroundColor = .white
+               filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: eventCellReuseIdentifier)
+               filterCV.dataSource = self
+               filterCV.delegate = self
+               filterCV.translatesAutoresizingMaskIntoConstraints = false
+               view.addSubview(filterCV)
         
         
         setupConstraints()
@@ -74,9 +98,15 @@ class EventPage: UIViewController {
     }
     
     func setupConstraints() {
+        NSLayoutConstraint.activate([
+              filterCV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+              filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+              filterCV.heightAnchor.constraint(equalToConstant: 50),
+              filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
+                     ]);
         
         eventCollectionView.snp.makeConstraints{ make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(45)
+            make.top.equalTo(filterCV.snp.bottom).offset(padding)
             make.leading.equalToSuperview().offset(padding)
             make.bottom.equalToSuperview()
             make.trailing.equalToSuperview().offset(-padding)
@@ -90,19 +120,30 @@ class EventPage: UIViewController {
 extension EventPage: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return events.count
+     if(collectionView == filterCV){
+                   return filters.count}
+               else{
+                   return events.count
+               }
             
         
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! EventCollectionViewCell
-            cell.delegate=self
+         if(collectionView == filterCV){
+                  let cell = filterCV.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
+                                      
+            cell.configure(for: filters[indexPath.item])
+                  return cell
+              }
+              else{
+                  let cell = collectionView.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! EventCollectionViewCell
+                  cell.delegate=self
 
-            cell.configure(for: events[indexPath.item])
-            collectionView.backgroundColor = .white
-            return cell
+                  cell.configure(for: events[indexPath.item])
+                  collectionView.backgroundColor = backColor
+                  return cell
+              }
 
     }
 
@@ -116,15 +157,22 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-            let size = (collectionView.frame.width - padding*2)
-        return CGSize(width: size, height: size/2.0)
+                if(collectionView == filterCV){
+                    let size = (filterCV.frame.width - 2 * padding)/4.0
+                    return CGSize(width: size, height: 40)
 
-        
+                }else{
+                    let size = (collectionView.frame.width - padding*2)
+                    return CGSize(width: size, height: size/2.0)}
+
+                
+            }
+
     }
     
 
 
-}
+
 
 extension EventPage: View {
     func setFriend2(i: User) {
@@ -134,10 +182,13 @@ extension EventPage: View {
     
     func removeEvent(i: Event) {
         delegate?.removeuserEvent(event: i)
+        events = delegate?.getEvents()
     }
     
     func setEvent(i: Event) {
         delegate?.setuserEvent(event: i)
+        currentEvent.people.append((delegate?.getUser())!)
+        events=delegate?.getEvents()
         eventCollectionView.reloadData()
     }
     
@@ -162,7 +213,7 @@ extension EventPage: View {
         var pos=0
         var e: [Event] = []
         for j in events {
-            if !(j.name==i.name) {
+            if !(j.id==i.id) {
                 e.append(j)
             }
             pos+=1
@@ -174,7 +225,7 @@ extension EventPage: View {
     func addToView(i: Event) {
         var pos=(-1)
         for j in events {
-            if j.name==i.name {
+            if j.id==i.id {
                 pos=1
             }
         }
@@ -184,6 +235,13 @@ extension EventPage: View {
         eventCollectionView.reloadData()
     }
     
+    func deleteEvent(i: Event) {
+        
+        delegate?.deleteEvent(event: i)
+        events=delegate?.getEvents()
+        delegate?.pop()
+    }
+    
     
 }
 
@@ -191,17 +249,52 @@ extension EventPage: View {
 extension EventPage: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        currentEvent = events[indexPath.row]
-        currentIndex = indexPath.row
-        
-        let newViewController = ViewEvent()
-        newViewController.delegate = self
-        delegate?.pushView(event: currentEvent, viewConroller: newViewController)
-        
-        
-        
-    collectionView.reloadData()
-
+        if(collectionView==filterCV){
+                   let f = filters[indexPath.item]
+                        if(f.isOn){
+                            filters[indexPath.item].isOn = false
+                        }
+                        else{
+                            filters[indexPath.item].isOn = true
+                        }
+                         var falseCount = 0
+                            events.removeAll()
+                             for filter in filters{
+                                       if (filter.isOn == false)
+                                       {falseCount+=1}
+                                                               
+                                   }
+                                   if(falseCount == filters.count){
+                                       for e in allEvents{
+                                           events.append(e)
+                                       }}
+                                   else{
+                                   for e in allEvents{
+                                       for f in e.tags{
+                                           if(f.isOn)
+                                           { events.append(e)}
+                                       
+                                    }
+                                           }}
+                        filterCV.reloadData()
+                        eventCollectionView.reloadData()
+                   
+                   
+                   
+                   
+                   
+               }
+               else{
+               currentEvent = events[indexPath.row]
+               currentIndex = indexPath.row
+               
+               let newViewController = ViewEvent()
+               newViewController.delegate = self
+               delegate?.pushView(event: currentEvent, viewConroller: newViewController)
+               }
+               
+               
+           collectionView.reloadData()
     }
 }
 
@@ -209,4 +302,6 @@ extension EventPage: UICollectionViewDelegate {
 
     
     
+
+
 
