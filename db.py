@@ -43,7 +43,7 @@ association_table_4 = db.Table(
     "association4",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("sender_netid", db.Integer, db.ForeignKey("user.id"))
+    db.Column("sender_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_5 = db.Table(
@@ -66,7 +66,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     location = db.Column(db.String, nullable=False)
-    time = db.Column(db.String, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String, nullable=False)
     publicity = db.Column(db.String, nullable=False)
     tag = db.relationship("Tag", secondary=association_table_3, back_populates="event")
