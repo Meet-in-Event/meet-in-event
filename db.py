@@ -198,8 +198,8 @@ class Friend(db.Model):
     def serialize(self):
         return{
             "id": self.id,
-            "me_id": self.me_netid,
-            "friend_id": self.friend_netid
+            "me_netid": self.me_netid,
+            "friend_netid": self.friend_netid
         }
 
 class Asset(db.Model):
