@@ -29,7 +29,6 @@ def hello_world():
 
 # ----------- USER ROUTES -------------------------------------------------------------------
 
-# TODO: Function for updating for all the fields
 
 @app.route("/api/users/", methods=['POST'])
 def create_user():
@@ -112,7 +111,6 @@ def receive_friend_request(netid):
     sender = User.query.filter_by(netid = the_request.sender_netid).first()
     if sender is None:
         return failure_response("User not found!")
-    # change this
     if receiver in sender.friend:
         return failure_response("You are already friends!")
     if accepted not in ("true", "false"):
@@ -160,7 +158,6 @@ def delete_friend(user_netid):
 
 # ----------- EVENT ROUTES -------------------------------------------------------------------
 
-#still working on tag part
 @app.route("/api/event/<user_netid>/", methods=['POST'])
 def create_event(user_netid):
     creator = User.query.filter_by(netid = user_netid).first()
@@ -264,7 +261,6 @@ def remove_interested_event(event_id):
     return success_response(user.serialize())
 
 
-#still working on publicity, dyj: user_id should be in the route I think
 @app.route("/api/events/")
 def get_all_events():
     return success_response([t.serialize() for t in Event.query.all()])
@@ -349,9 +345,6 @@ def get_event(event_id):
             return failure_response("You have no access!")
     
     return success_response(event.serialize())
-
-
-    
 
 
 if __name__ == "__main__":
