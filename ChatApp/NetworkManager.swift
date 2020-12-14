@@ -10,7 +10,7 @@ import Alamofire
 
 class NetworkManager {
 
-    private static let host = "http://0.0.0.0:5000"
+    private static let host = "https://meet-in-event.herokuapp.com"
     
     static func createUser(u: User, completion: @escaping (User2, User) -> Void) {
         let parameters: [String: Any] = [
@@ -74,18 +74,57 @@ class NetworkManager {
         }
     }
 
-    static func createEvent(e: Event, user: User) {
+    static func createEvent(e: Event, user: User, completion: @escaping (Event2) -> Void) {
         let parameters: [String: Any] = [
             "title": e.name,
             "location": e.location,
-            //date object??
-            "time": e.date.getDate(),
+            "time": e.date.getTimeStamp(),
             "description": e.desc,
-            "publicity": e.publ
-            //creator?
+            "publicity": e.getPublicity(),
+            "Tags": e.getTags()
 
         ]
         let endpoint = "\(host)/api/event/\(user.netid)/"
+        AF.request(endpoint, method: .post, parameters: parameters, encoding: JSONEncoding.default).validate().responseData { response in
+            switch response.result {
+            case .success(let data):
+                let jsonDecoder = JSONDecoder()
+                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+                if let eventData = try? jsonDecoder.decode(Event2.self, from: data) {
+                    completion(eventData)
+                }
+            
+            
+            /////////////////
+            //make sure to set the event id
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    
+    static func deleteEvent(e: Event) {
+        let endpoint = "\(host)/api/events/\(e.id)/"
+        AF.request(endpoint, method: .delete).validate().responseData { response in
+            switch response.result {
+            case .success(let data):
+                let jsonDecoder = JSONDecoder()
+                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+//                if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
+//                    completion(eventsData.events)
+//                }
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    static func signUp(e: Event, user: User) {
+        let parameters: [String: Any] = [
+            "user_netid": user.netid
+        ]
+        let endpoint = "\(host)/api/interestevent/\(e.id)/"
         AF.request(endpoint, method: .post, parameters: parameters, encoding: JSONEncoding.default).validate().responseData { response in
             switch response.result {
             case .success(let data):
@@ -99,5 +138,26 @@ class NetworkManager {
             }
         }
     }
+    
+    static func removeSignUp(e: Event, user: User) {
+        let parameters: [String: Any] = [
+            "user_netid": user.netid
+        ]
+        let endpoint = "\(host)/api/event/\(e.id)/"
+        AF.request(endpoint, method: .delete, parameters: parameters, encoding: JSONEncoding.default).validate().responseData { response in
+            switch response.result {
+            case .success(let data):
+                let jsonDecoder = JSONDecoder()
+                jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+//                if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
+//                    completion(eventsData)
+//                }
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    
 
 }

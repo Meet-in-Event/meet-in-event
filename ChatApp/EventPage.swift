@@ -164,7 +164,7 @@ extension EventPage: View {
         var pos=0
         var e: [Event] = []
         for j in events {
-            if !(j.name==i.name) {
+            if !(j.id==i.id) {
                 e.append(j)
             }
             pos+=1
@@ -176,7 +176,7 @@ extension EventPage: View {
     func addToView(i: Event) {
         var pos=(-1)
         for j in events {
-            if j.name==i.name {
+            if j.id==i.id {
                 pos=1
             }
         }

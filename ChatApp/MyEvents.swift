@@ -153,7 +153,7 @@ extension MyEvents: View {
         pos=0
         var pos3=0
         for j in events {
-            if j.name==i.name {
+            if j.id==i.id {
                 pos3=pos
             }
             pos+=1
@@ -174,7 +174,7 @@ extension MyEvents: View {
         var pos=0
         var pos3=0
         for j in events {
-            if j.name==i.name {
+            if j.id==i.id {
                 pos3=pos
             }
             pos+=1
@@ -213,7 +213,7 @@ extension MyEvents: View {
         var pos=0
         var e: [Event] = []
         for j in events {
-            if !(j.name==i.name) {
+            if !(j.id==i.id) {
                 e.append(j)
             }
             pos+=1
@@ -225,7 +225,7 @@ extension MyEvents: View {
         var pos=0
         var l=0
         for j in events {
-            if j.name==i.name {
+            if j.id==i.id {
                 l=pos
             }
             pos+=1

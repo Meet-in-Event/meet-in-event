@@ -146,7 +146,7 @@ class EventCollectionViewCell: UICollectionViewCell {
         if let f = favs {
             var pos = 0
             for i in f {
-                if i.name==event.name {
+                if i.id==event.id {
                     self.isFav=true
                     star.setImage(UIImage(named: "star2"), for: .normal)
                 }

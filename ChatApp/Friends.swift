@@ -8,9 +8,9 @@
 import UIKit
 import SnapKit
 
-protocol Friend {
-    func getColor(u: User) -> UIColor
-}
+//protocol Fr {
+//    func getColor(u: User) -> UIColor
+//}
 
 class Friends: UIViewController {
     
@@ -91,25 +91,25 @@ extension Friends: UITableViewDelegate {
     }
 
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        currentFriend = friends[indexPath.row]
-//        currentIndex = indexPath.row
-        let cell = tableView.cellForRow(at: indexPath) as! FriendTableViewCell
-        if let f = delegate?.getRequest() {
-            for i in f {
-                if i.netid==currentFriend.netid {
-                    cell.backgroundColor = backColor
-                }
-            }
-        }
-        
-        
-//        currentCell = cell
-        
-//        let newViewController = EditData()
-//        newViewController.delegate = self
-//        navigationController?.pushViewController(newViewController, animated: true)
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        currentFriend = friends[indexPath.row]
+////        currentIndex = indexPath.row
+//        let cell = tableView.cellForRow(at: indexPath) as! FriendTableViewCell
+//        if let f = delegate?.getRequest() {
+//            for i in f {
+//                if i.netid==currentFriend.netid {
+//                    cell.backgroundColor = backColor
+//                }
+//            }
+//        }
+//        
+//        
+////        currentCell = cell
+//        
+////        let newViewController = EditData()
+////        newViewController.delegate = self
+////        navigationController?.pushViewController(newViewController, animated: true)
+//    }
     
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -123,18 +123,18 @@ extension Friends: UITableViewDelegate {
 
 }
 
-extension Friends: Friend {
-    func getColor(u: User) -> UIColor {
-        if let f = delegate?.getRequest() {
-            for i in f {
-                if u.netid==i.netid {
-                    return .magenta
-                }
-            }
-        }
-        return backColor
-    }
-}
+//extension Friends: Fr {
+//    func getColor(u: User) -> UIColor {
+//        if let f = delegate?.getRequest() {
+//            for i in f {
+//                if u.netid==i.netid {
+//                    return .magenta
+//                }
+//            }
+//        }
+//        return backColor
+//    }
+//}
 
 
 

@@ -220,9 +220,9 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          }
          else{
             event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: Date(year: 20, mon: 0, day: 25, hour: 4, min: 55, suf: "AM"), creator: user, location: locationField.text!)
-//            NetworkManager.createEvent(e: event, user: self.user) { ev in
-//                self.event = ev
-//                }
+            NetworkManager.createEvent(e: event, user: self.user) { ev in
+                self.event.id = ev.id
+                }
             self.delegate?.addEvent(i: event)
             eventNameField.text=""
             descriptionField.text=""

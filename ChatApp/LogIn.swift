@@ -157,11 +157,11 @@ class LogIn: UIViewController {
                 if !(self.usernameField.text==user2.netid) {
                     self.usernameError.text="Invalid Netid"
                 }
-                else if !(self.usernameField.text==user2.netid) {
+                else if !(self.usernameField.text==user2.password) {
                     self.passwordError.text="Invalid Password"
                 }
                 else {
-                    self.delegate?.createUser(i: User(netid: user2.netid, name: user2.name, password: self.usernameField.text!, socialAccount: user2.socialAccount, id: user2.id))
+                    self.delegate?.createUser(i: User(user2: user2))
                 }
             }
          //  delegate?.getUserFromUsername(i: usernameField.text!)

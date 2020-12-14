@@ -181,7 +181,7 @@ class ViewEvent: UIViewController {
         sign=0
         if let c = user.eventCreated {
             for i in c {
-                if i.name==event.name {
+                if i.id==event.id {
                     signUpButton=nil
                     sign=1
                 }

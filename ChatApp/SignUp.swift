@@ -248,8 +248,8 @@ class SignUp: UIViewController {
         else {
             self.user = User(netid: usernameField.text!, name: displaynameField.text!, password: passwordField.text!, socialAccount: socialField.text!)
             NetworkManager.createUser(u: self.user) { user2, u in
-                self.user=u
-                self.user.id=user2.id
+                self.user=User(user2: user2)
+                self.user.password = u.password
                 self.delegate?.createUser(i: self.user)
                 }
             navigationController?.popViewController(animated: true)

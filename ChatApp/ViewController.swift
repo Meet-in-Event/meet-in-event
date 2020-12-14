@@ -85,9 +85,9 @@ class ViewController: UIViewController {
         tapped=false
         
         
-        NetworkManager.getFriendRequest() {
+     //   NetworkManager.getFriendRequest() {
         
-        }
+      //  }
         //get the friend requests
         
         
@@ -131,13 +131,13 @@ class ViewController: UIViewController {
                     if let f = self.user.friends {
                         for j in f {
                             if j.netid==i.creator.netid {
-                                self.events.append(Event(name: i.title, desc: i.description, date: i.time, creator: i.creator, location: i.location, people: i.people, publ: i.publicity))
+                                self.events.append(Event(event2: i))
                             }
                         }
                     }
                 }
                 else {
-                    self.events.append(Event(name: i.title, desc: i.description, date: i.time, creator: i.creator, location: i.location, people: i.people, publ: i.publicity))
+                    self.events.append(Event(event2: i))
                 }
             }
     }
@@ -273,7 +273,7 @@ class ViewController: UIViewController {
             for i in events {
                 if let f = user.favs {
                     for j in f {
-                        if i.name==j.name {
+                        if i.id==j.id {
                             e.append(i)
                         }
                     }
@@ -394,7 +394,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos3=0
         for i in events {
-            if i.name==event.name {
+            if i.id==event.id {
                 pos3=pos
             }
             pos+=1
@@ -404,7 +404,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos4=0
         for i in user.eventInterested! {
-            if i.name==event.name {
+            if i.id==event.id {
                 pos4=pos
             }
             pos+=1
@@ -413,6 +413,8 @@ extension ViewController: Events, Add, Profile, Login {
         eventPage.events = self.events
         
         profilePage.user = self.user
+        
+        NetworkManager.removeSignUp(e: event, user: self.user)
     }
     
     func setuserEvent(event: Event) {
@@ -435,7 +437,7 @@ extension ViewController: Events, Add, Profile, Login {
         var pos=0
         var pos3=0
         for i in events {
-            if i.name==event.name {
+            if i.id==event.id {
                 pos3=pos
             }
             pos+=1
@@ -446,6 +448,8 @@ extension ViewController: Events, Add, Profile, Login {
         user.eventInterested?.append(event)
         
         profilePage.user = self.user
+        
+        NetworkManager.signUp(e: event, user: self.user)
 
     }
     
@@ -453,7 +457,7 @@ extension ViewController: Events, Add, Profile, Login {
         var pos=0
         var pos3=0
         for i in events {
-            if i.name==event.name {
+            if i.id==event.id {
                 pos3=pos
             }
             pos+=1
@@ -463,7 +467,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos4=0
         for i in user.eventCreated! {
-            if i.name==event.name {
+            if i.id==event.id {
                 pos4=pos
             }
             pos+=1
@@ -472,6 +476,8 @@ extension ViewController: Events, Add, Profile, Login {
         eventPage.events = self.events
         eventPage.eventCollectionView.reloadData()
         profilePage.user = self.user
+        
+        NetworkManager.deleteEvent(e: event)
     }
     
     func getUser() -> User {
@@ -495,7 +501,7 @@ extension ViewController: Events, Add, Profile, Login {
     func removeFav2(i: Event) {
         var pos = 0
         for j in user.favs! {
-            if j.name==i.name {
+            if j.id==i.id {
                 user.favs?.remove(at: pos)
             }
             pos+=1

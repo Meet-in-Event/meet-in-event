@@ -14,7 +14,7 @@ class FriendTableViewCell: UITableViewCell {
         
     var imageName: String!
     
-    weak var delegate: Friend?
+  //  weak var delegate: Fr?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -80,7 +80,7 @@ class FriendTableViewCell: UITableViewCell {
         socialLabel.text = friend.socialAccount
         profileImage.image = UIImage(named: "blankprofile")
         
-        delegate?.getColor(u: friend)
+    //    delegate?.getColor(u: friend)
 
     }
 }
