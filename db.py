@@ -40,7 +40,7 @@ association_table_5 = db.Table(
 association_table_6 = db.Table(
     "association6",
     db.Model.metadata,
-    db.Column("friend", db.Integer, db.ForeignKey("friend.id")),
+    db.Column("friend", db.Integer, db.ForeignKey("friend.friend_id")),
     db.Column("me", db.Integer, db.ForeignKey("user.id"))
 )
 
@@ -140,7 +140,8 @@ class User(db.Model):
             "netid": self.netid,
             "social_account": self.social_account,
             "event_created": event_created,
-            "event_interested": event_interested
+            "event_interested": event_interested,
+            "friend": [s.serialize() for s in self.friend]
         }
 
 
@@ -171,9 +172,11 @@ class Friend(db.Model):
     __tablename__ = "friend"
     id = db.Column(db.Integer, primary_key=True)
     me = db.relationship("User", secondary=association_table_6, back_populates="friend")
+    me_id = db.Column(db.String, nullable=False)
     friend_id = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
+        self.me_id = kwargs.get("me_id", "")
         self.friend_id = kwargs.get("friend_id", "")
     
     def serialize(self):
