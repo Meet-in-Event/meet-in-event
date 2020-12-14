@@ -6,21 +6,22 @@
 //
 
 import UIKit
-class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPickerViewDataSource
-{
+class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPickerViewDataSource {
     
     
     
-    weak var delegate: Profile?
+    weak var delegate: Add?
     var event: Event!
     var profileImage: UIImageView!
-     var eventNameField: UITextField!
-     var descriptionField: UITextView!
+    var eventNameField: UITextField!
+    var descriptionField: UITextView!
+    var locationField: UITextField!
+    var error: UILabel!
     var category: UIPickerView!
     var categoryOptions: [String] = []
     var datePicker: UIDatePicker!
     var date : Date!
-     var user: User!
+    var user: User!
     var saveButton: UIButton!
  //   var
 
@@ -28,8 +29,9 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
     
      override func viewDidLoad() {
          super.viewDidLoad()
-         view.backgroundColor = backgroundColor
+         view.backgroundColor = backColor
         categoryOptions = ["Friends Only", "Public"]
+        user = delegate?.getUser()
 
          setupViews()
          setupConstraints()
@@ -45,7 +47,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         
          eventNameField = UITextField()
          eventNameField.translatesAutoresizingMaskIntoConstraints = false
-         eventNameField.backgroundColor = backgroundColor
+         eventNameField.backgroundColor = backColor
 //         eventNameField.layer.borderWidth = 1
 //         eventNameField.layer.cornerRadius = 10
 //         eventNameField.layer.borderColor = UIColor.black.cgColor
@@ -57,14 +59,25 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          
          descriptionField = UITextView()
          descriptionField.translatesAutoresizingMaskIntoConstraints = false
-        descriptionField.backgroundColor = UIColor(red: 253/255, green:213/255, blue: 174/255, alpha: 0.9)
+        descriptionField.backgroundColor = textFieldColor
          descriptionField.layer.borderWidth = 1
          descriptionField.layer.cornerRadius = 10
-        descriptionField.layer.borderColor = backgroundColor.cgColor
+        descriptionField.layer.borderColor = backColor.cgColor
          descriptionField.textAlignment = .center
          descriptionField.textColor = .gray
         descriptionField.text = "Quick description, anything you'd like others to know about your event?"
          view.addSubview(descriptionField)
+        
+        locationField = UITextField()
+        locationField.translatesAutoresizingMaskIntoConstraints = false
+        locationField.backgroundColor = .white
+        locationField.layer.borderWidth = 1
+        locationField.layer.cornerRadius = 10
+        locationField.layer.borderColor = UIColor.black.cgColor
+        locationField.textAlignment = .center
+        locationField.textColor = .black
+        locationField.attributedPlaceholder = NSAttributedString(string:"Location", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
+        view.addSubview(locationField)
 
          
          category = UIPickerView()
@@ -73,7 +86,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          category.layer.borderWidth = 1
          category.layer.cornerRadius = 10
          category.layer.borderColor = UIColor.black.cgColor
-        category.backgroundColor = backgroundColor
+        category.backgroundColor = backColor
 //         category.textAlignment = .center
 //         category.textColor = .black
 //         category.attributedPlaceholder = NSAttributedString(string:"Description", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray])
@@ -87,12 +100,13 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
 //        saveButton.layer.borderColor = UIColor.black.cgColor
         saveButton.setTitle("Save", for: .normal)
         saveButton.titleLabel?.textColor = .gray
-        saveButton.backgroundColor = UIColor(red: 253/255, green:213/255, blue: 174/255, alpha: 0.9)
+        saveButton.backgroundColor = textFieldColor
+        saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         view.addSubview(saveButton)
         
         datePicker = UIDatePicker()
         datePicker.timeZone = NSTimeZone.local
-        datePicker.backgroundColor = UIColor.white
+        datePicker.backgroundColor = backColor
                
                // Add an event to call onDidChangeDate function when value is changed.
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
@@ -103,6 +117,13 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          descriptionField.delegate =  self
     category.delegate = self
       category.dataSource = self
+        
+        
+        error = UILabel()
+        error.font = UIFont.systemFont(ofSize: 15)
+        error.textColor = .red
+        error.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(error)
 
      }
      
@@ -125,46 +146,63 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
              make.width.equalTo(250)
              make.height.equalTo(80)
          }
+        
+        locationField.snp.makeConstraints{ make in
+            make.top.equalTo(descriptionField.snp.bottom).offset(offset)
+           make.centerX.equalTo(view.snp.centerX)
+            make.width.equalTo(200)
+            make.height.equalTo(30)
+        }
 
         
       //  datePicker.frame = CGRect(x: 10, y: 300, width: self.view.frame.width, height: 200)
        
 
         datePicker.snp.makeConstraints{make in
-            make.top.equalTo(descriptionField.snp.bottom).offset(offset)
+            make.top.equalTo(locationField.snp.bottom).offset(offset)
             make.centerX.equalTo(view.snp.centerX)
             make.width.equalTo(view.frame.width - 20)
-            make.height.equalTo(150)
+            make.height.equalTo(30)
                    
         }
         
        
         
-        saveButton.snp.makeConstraints{make in
-            make.top.equalTo(datePicker.snp.bottom).offset(offset + 20)
-            make.centerX.equalTo(view.snp.centerX).offset(70)
-            make.width.equalTo(60)
-            make.height.equalTo(30)
-                }
+      
         category.snp.makeConstraints{ make in
             make.top.equalTo(datePicker.snp.bottom).offset(offset)
-            make.centerX.equalTo(view.snp.centerX).offset(-50)
+            make.centerX.equalTo(view.snp.centerX)
                            make.width.equalTo(150)
                            make.height.equalTo(50)
                        }
+        
+        error.snp.makeConstraints{make in
+            make.top.equalTo(category.snp.bottom).offset(offset)
+            make.centerX.equalToSuperview()
+        }
+        
+        
+        saveButton.snp.makeConstraints{make in
+            make.top.equalTo(error.snp.bottom).offset(offset)
+            make.centerX.equalTo(view.snp.centerX)
+            make.width.equalTo(60)
+            make.height.equalTo(30)
+                }
          
      }
     @objc func datePickerValueChanged(_ sender: UIDatePicker){
          
          // Create date formatter
          let dateFormatter: DateFormatter = DateFormatter()
-         
+
          // Set date format
          dateFormatter.dateFormat = "MM/dd/yyyy hh:mm a"
          
          // Apply date format
          let selectedDate: String = dateFormatter.string(from: sender.date)
-         
+//        let Index1 = selectedDate.index(selectedDate.startIndex, offsetBy: 0)
+//        let Index2 = selectedDate.index(selectedDate.startIndex, offsetBy: 1)
+//        print(selectedDate[Index2]+selectedDate[Index2])
          print("Selected value \(selectedDate)")
 
     
@@ -175,15 +213,26 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
      
      
      @objc func saveTapped() {
-         if eventNameField.text=="" ||  descriptionField.text==""  {
+        
+        if eventNameField.text=="" ||  descriptionField.text=="" || locationField.text==""  {
             print("must not be empty")
+            error.text = "fields must not be empty"
          }
          else{
-            event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: self.date, creator: (delegate?.getUser())!, people: [])
-        }
-         
-         navigationController?.popViewController(animated: true)
+            event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: Date(year: 20, mon: 0, day: 25, hour: 4, min: 55, suf: "AM"), creator: user, location: locationField.text!)
+//            NetworkManager.createEvent(e: event, user: self.user) { ev in
+//                self.event = ev
+//                }
+            self.delegate?.addEvent(i: event)
+            eventNameField.text=""
+            descriptionField.text=""
+            locationField.text=""
+            self.delegate?.home()
+            }
+        
+            
          }
+         
    
 
 func textViewDidBeginEditing(_ textView: UITextView) {
@@ -211,8 +260,7 @@ func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent com
      // The parameter named row and component represents what was selected.
  }
 func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return categoryOptions[row]
-    }
+    return categoryOptions[row]
+}
 }
    
-
