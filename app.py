@@ -53,7 +53,7 @@ def get_user(netid):
         return failure_response("User not found!")
     return success_response(user.serialize())
 
-@app.route("/api/friends/<int:netid>/", methods=['GET'])
+@app.route("/api/friends/<netid>/", methods=['GET'])
 def get_friends(netid):
     user = User.query.filter_by(netid = netid).first()
     
@@ -160,9 +160,9 @@ def delete_friend(user_netid):
 # ----------- EVENT ROUTES -------------------------------------------------------------------
 
 #still working on tag part
-@app.route("/api/event/<user_id>/", methods=['POST'])
-def create_event(user_id):
-    creator = User.query.filter_by(id = user_id).first()
+@app.route("/api/event/<user_netid>/", methods=['POST'])
+def create_event(user_netid):
+    creator = User.query.filter_by(netid = user_netid).first()
     if creator is None:
         return failure_response("User not found!")
     body = json.loads(request.data)
@@ -236,7 +236,7 @@ def delete_event(event_id):
     user = User.query.filter_by(netid = user_netid).first()
     if user is None:
         return failure_response("User not found!")
-    if event not in user.event_created or user is not event.creator:
+    if event not in user.event_created or user not in event.creator:
         return failure_response("You have no right to delete this event!")
     db.session.delete(event)
     db.session.commit()
@@ -276,24 +276,43 @@ def get_all_events_for_user(user_netid):
         return failure_response("User not found!")   
     response = []
     for e in Event.query.all():
-        if e.publicity is True:
+        if e.publicity == "True":
             response.append(e.serialize())
         #what if the initiator wants to let all friends to view the event?
-        elif e.publicity is False:
-            if Friend.query.filter_by(me_netid = e.creator.netid, friend_netid = user_netid).first() is not None:
+        elif e.publicity == "False":
+            isFriend = False
+            if user in e.creator:
+                isFriend = True
+            for f in user.friend:
+                for c in e.creator:
+                    if f.friend_netid == c.netid:
+                        isFriend = True
+            if isFriend == True:
                 response.append(e.serialize())
             
     return success_response(response)
 
-@app.route("/api/events/<int:event_id>/")
+@app.route("/api/event/<int:event_id>/")
 def get_event(event_id): 
+    body = json.loads(request.data)
     event = Event.query.filter_by(id = event_id).first()
+    user_netid = body.get("user_netid")
     
+    if user_netid is None:
+        return failure_response("User not found!") 
     if event is None:
         return failure_response("Event not found!")
-    if event.publicity is False:
-            if Friend.query.filter_by(me_netid = e.creator.netid, friend_netid = user).first() is None:
-                return failure_response("you have no access")
+    if event.publicity == "False":
+
+        isFriend = False
+        if user in e.creator:
+                isFriend = True
+        for f in user.friend:
+            for c in event.creator:
+                if f.friend_netid == c.netid:
+                    isFriend = True
+        if isFriend == True:
+            return failure_response("you have no access")
     
     return success_response(event.serialize())
 
@@ -310,6 +329,7 @@ def upload():
     return success_response(asset.serialize(), 201)
 
     
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
