@@ -245,7 +245,7 @@ def delete_event(event_id):
 
 
 @app.route("/api/event/<int:event_id>/", methods=["DELETE"])
-def delete_interested_event(event_id):
+def remove_interested_event(event_id):
     body = json.loads(request.data)
     event = Event.query.filter_by(id = event_id).first()
     if event is None:
@@ -335,16 +335,18 @@ def get_event(event_id):
     if event is None:
         return failure_response("Event not found!")
     if event.publicity == "False":
-
+        user = User.query.filter_by(netid = user_netid).first()
+        if user is None:
+            return failure_response("User not found!")
         isFriend = False
-        if user in e.creator:
+        if user in event.creator:
                 isFriend = True
         for f in user.friend:
             for c in event.creator:
                 if f.friend_netid == c.netid:
                     isFriend = True
         if isFriend == False:
-            return failure_response("you have no access")
+            return failure_response("You have no access!")
     
     return success_response(event.serialize())
 
