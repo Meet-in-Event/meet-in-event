@@ -25,6 +25,7 @@ protocol View: class {
 
 class EventPage: UIViewController {
     var filterCV: UICollectionView!
+    let tagCellReuseIdentifier = "tagCellReuseIdentifier"
     var eventCollectionView: UICollectionView!
     let eventCellReuseIdentifier = "eventCellReuseIdentifier"
     let padding: CGFloat = 8
@@ -42,8 +43,8 @@ class EventPage: UIViewController {
     
     var filter1 = Tag(tag: "Sports")
       var filter2 = Tag(tag: "Music")
-      var filter3 = Tag(tag: "Study Dates")
-    var filter4 = Tag(tag: "Outdoor Activities")
+      var filter3 = Tag(tag: "Study")
+    var filter4 = Tag(tag: "Outdoors")
     var filter5 = Tag(tag: "Shopping")
     var filter6 = Tag(tag: "Other")
     
@@ -67,7 +68,7 @@ class EventPage: UIViewController {
         let filterLayout = UICollectionViewFlowLayout()
         filterLayout.scrollDirection = .horizontal
         filterLayout.minimumInteritemSpacing = padding
-        filterLayout.minimumLineSpacing = 0
+       // filterLayout.minimumLineSpacing = 0
         
         
         let layout = UICollectionViewFlowLayout()
@@ -84,13 +85,13 @@ class EventPage: UIViewController {
         view.addSubview(eventCollectionView)
         
         
-               filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
-               filterCV.backgroundColor = .white
-               filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: eventCellReuseIdentifier)
-               filterCV.dataSource = self
-               filterCV.delegate = self
-               filterCV.translatesAutoresizingMaskIntoConstraints = false
-               view.addSubview(filterCV)
+        filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
+        filterCV.backgroundColor = backColor
+        filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: tagCellReuseIdentifier)
+        filterCV.dataSource = self
+        filterCV.delegate = self
+        filterCV.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filterCV)
         
         
         setupConstraints()
@@ -99,15 +100,21 @@ class EventPage: UIViewController {
     
     func setupConstraints() {
         
-        filterCV.snp.makeConstraints{make in
-            make.top.equalToSuperview().offset(50)
-            make.leading.equalToSuperview().offset(padding)
-            make.height.equalTo(50)
-            make.trailing.equalToSuperview().offset(-padding)
-        }
+//        filterCV.snp.makeConstraints{make in
+//            make.top.equalTo(view.)
+//            make.leading.equalToSuperview().offset(padding)
+//            make.height.equalTo(100)
+//            make.trailing.equalToSuperview().offset(-padding)
+//        }
+        NSLayoutConstraint.activate([
+                     filterCV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+                     filterCV.heightAnchor.constraint(equalToConstant: 40),
+                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
+                            ]);
         
         eventCollectionView.snp.makeConstraints{ make in
-            make.top.equalTo(filterCV.snp.bottom).offset(45)
+            make.top.equalTo(filterCV.snp.bottom).offset(10)
             make.leading.equalToSuperview().offset(padding)
             make.bottom.equalToSuperview()
             make.trailing.equalToSuperview().offset(-padding)
@@ -139,7 +146,7 @@ extension EventPage: UICollectionViewDataSource {
 //            collectionView.backgroundColor = backColor
 //            return cell
         if(collectionView == filterCV){
-                 let cell = filterCV.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
+                 let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                      
            cell.configure(for: filters[indexPath.item])
                  return cell
@@ -154,6 +161,31 @@ extension EventPage: UICollectionViewDataSource {
              }
 
     }
+    
+    func sort() {
+        var falseCount = 0
+           events.removeAll()
+            for filter in filters{
+                      if (filter.isOn == false)
+                      {falseCount+=1}
+                                              
+                  }
+                  if(falseCount == filters.count){
+                      for e in allEvents{
+                          events.append(e)
+                      }}
+                  else{
+                  for e in allEvents{
+                   if let i = e.tags {
+                      for f in i{
+                          if(f.isOn)
+                          { events.append(e)}
+                      }
+                   }
+                          }}
+       filterCV.reloadData()
+       eventCollectionView.reloadData()
+    }
 
 }
 
@@ -165,16 +197,18 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-//            let size = (collectionView.frame.width - padding*2)
-//        return CGSize(width: size, height: collectionView.frame.height/3.5)
+            
         if(collectionView == filterCV){
-            let size = (filterCV.frame.width - 2 * padding)/4.0
-            return CGSize(width: size, height: 40)
+//            let size = (filterCV.frame.width - 2 * padding)/4.0
+//            return CGSize(width: size, height: 40)
+            
+            let size = (collectionView.frame.width - padding*3) / 2.5
+            return CGSize(width: size, height: 30)
 
         }else{
             let size = (collectionView.frame.width - padding*2)
-            return CGSize(width: size, height: size/2.0)}
-
+        return CGSize(width: size, height: collectionView.frame.height/3.4)
+        }
         
         
     }
@@ -276,27 +310,7 @@ extension EventPage: UICollectionViewDelegate {
                         else{
                             filters[indexPath.item].isOn = true
                         }
-                         var falseCount = 0
-                            events.removeAll()
-                             for filter in filters{
-                                       if (filter.isOn == false)
-                                       {falseCount+=1}
-                                                               
-                                   }
-                                   if(falseCount == filters.count){
-                                       for e in allEvents{
-                                           events.append(e)
-                                       }}
-                                   else{
-                                   for e in allEvents{
-                                       for f in e.tags{
-                                           if(f.isOn)
-                                           { events.append(e)}
-                                       
-                                    }
-                                           }}
-                        filterCV.reloadData()
-                        eventCollectionView.reloadData()
+                         sort()
                    
                    
                    

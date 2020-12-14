@@ -11,18 +11,19 @@ import SnapKit
 
 class FilterCollectionViewCell: UICollectionViewCell {
     var filterLabel: UILabel!
-    let myColor =  UIColor(red: 151/255, green: 136/255, blue: 206/255, alpha: 1.0)
 
     override init(frame: CGRect) {
             super.init(frame: frame)
+       // contentView.backgroundColor = backColor
             filterLabel = UILabel()
             filterLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        filterLabel.layer.borderColor = myColor.cgColor
+        
+       // filterLabel.layer.borderColor = backColor.cgColor
         filterLabel.font = .systemFont(ofSize: 22)
+       // filterLabel.backgroundColor = eventColor
 
-        filterLabel.layer.cornerRadius = 5.0
-         filterLabel.layer.borderWidth = 2.0
+        contentView.layer.cornerRadius = 5
+      //  filterLabel.layer.borderWidth = 2.0
         contentView.addSubview(filterLabel)
             
             setupConstraints()
@@ -44,15 +45,16 @@ class FilterCollectionViewCell: UICollectionViewCell {
         
         func configure(for filter: Tag) {
             filterLabel.text = filter.tag
-            filterLabel.textAlignment = .center
+           // filterLabel.textAlignment = .center
             if(filter.isOn)
             {
-                filterLabel.backgroundColor = myColor
+                contentView.backgroundColor = UIColor(red: 253/255.0, green: 120/255.0, blue: 200/255.0, alpha: 1
+                )
                 filterLabel.textColor = .white
             }
             else{
-                filterLabel.backgroundColor = .white
-                filterLabel.textColor = myColor
+                contentView.backgroundColor = eventColor
+                filterLabel.textColor = .black
             }
             
         }
@@ -63,5 +65,10 @@ class FilterCollectionViewCell: UICollectionViewCell {
         
     }
 
+
+
+
+
     
+
 

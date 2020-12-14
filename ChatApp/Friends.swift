@@ -38,11 +38,11 @@ class Friends: UIViewController {
         
         user = self.delegate?.getUser()
         self.friends = user.friends
-        if let f = delegate?.getRequest() {
-            for i in f {
-                self.friends.append(i)
-            }
-        }
+//        if let f = delegate?.getRequest() {
+//            for i in f {
+//                self.friends.append(i)
+//            }
+//        }
     
         
         tableView = UITableView()

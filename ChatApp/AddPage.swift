@@ -25,7 +25,18 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
     var descIcon: UIImageView!
     var locIcon: UIImageView!
     var timeIcon: UIImageView!
- //   var
+    
+    var filterCV: UICollectionView!
+    let tagCellReuseIdentifier = "tagCellReuseIdentifier"
+    
+    var filter1 = Tag(tag: "Sports")
+      var filter2 = Tag(tag: "Music")
+      var filter3 = Tag(tag: "Study")
+    var filter4 = Tag(tag: "Outdoors")
+    var filter5 = Tag(tag: "Shopping")
+    var filter6 = Tag(tag: "Other")
+    
+    var filters: [Tag] = []
 
 
     
@@ -55,7 +66,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
 //         eventNameField.layer.borderColor = UIColor.black.cgColor
          eventNameField.textAlignment = .center
          eventNameField.textColor = .black
-        eventNameField.attributedPlaceholder = NSAttributedString(string:"Title of your event....", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray, NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 30.0)!])
+        eventNameField.attributedPlaceholder = NSAttributedString(string:"Event Title", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray, NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 30.0)!])
          view.addSubview(eventNameField)
          
          
@@ -133,6 +144,21 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         saveButton.backgroundColor = textFieldColor
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         view.addSubview(saveButton)
+        
+        filters = [filter1, filter2, filter3, filter4, filter5, filter6]
+        
+        
+        let filterLayout = UICollectionViewFlowLayout()
+        filterLayout.scrollDirection = .horizontal
+        filterLayout.minimumInteritemSpacing = 8
+        
+        filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
+        filterCV.backgroundColor = backColor
+        filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: tagCellReuseIdentifier)
+        filterCV.dataSource = self
+        filterCV.delegate = self
+        filterCV.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filterCV)
         
         datePicker = UIDatePicker()
         datePicker.timeZone = NSTimeZone.local
@@ -217,10 +243,15 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         }
         
        
-        
+        NSLayoutConstraint.activate([
+            filterCV.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: offset),
+                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+                     filterCV.heightAnchor.constraint(equalToConstant: 40),
+                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
+                            ]);
       
         category.snp.makeConstraints{ make in
-            make.top.equalTo(datePicker.snp.bottom).offset(offset)
+            make.top.equalTo(filterCV.snp.bottom).offset(offset)
             make.centerX.equalTo(view.snp.centerX)
                            make.width.equalTo(150)
                            make.height.equalTo(50)
@@ -298,7 +329,13 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             error.text = "fields must not be empty"
          }
          else{
-            event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: self.date, creator: user, location: locationField.text!)
+            var l: [Tag] = []
+            for i in filters {
+                if i.isOn {
+                    l.append(i)
+                }
+            }
+            event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: self.date, creator: user, location: locationField.text!, tags: l)
             NetworkManager.createEvent(e: event, user: self.user) { ev in
                 self.event.id = ev.id
                 }
@@ -342,6 +379,54 @@ func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent c
     return categoryOptions[row]
 }
 }
+
+
+
+extension AddPage: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return filters.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    
+                 let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
+                                     
+           cell.configure(for: filters[indexPath.item])
+                 return cell
+    
+}
+}
+
+
+extension AddPage: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+            let size = (collectionView.frame.width - 24) / 2.5
+            return CGSize(width: size, height: 30)
+    }
+}
    
 
-    
+
+
+    extension AddPage: UICollectionViewDelegate {
+
+        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+                       let f = filters[indexPath.item]
+                            if(f.isOn){
+                                filters[indexPath.item].isOn = false
+                            }
+                            else{
+                                filters[indexPath.item].isOn = true
+                            }
+               collectionView.reloadData()
+
+        }
+    }
+
+
+
+        
+        
+
+

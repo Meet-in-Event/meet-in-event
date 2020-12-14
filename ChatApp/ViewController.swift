@@ -281,6 +281,7 @@ class ViewController: UIViewController {
             }
             events=e
             eventPage.events = events
+            eventPage.sort()
             eventPage.eventCollectionView.reloadData()
             
         }
@@ -289,6 +290,7 @@ class ViewController: UIViewController {
             starButton.tintColor = .white
             events=allEvents
             eventPage.events = events
+            eventPage.sort()
             eventPage.eventCollectionView.reloadData()
             
         }

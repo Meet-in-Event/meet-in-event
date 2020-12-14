@@ -34,7 +34,7 @@ struct Event: Codable {
     var tags: [Tag]!
     var id: Int
 
-    init(name: String, desc: String, date: Date, creator: User, location: String, people: [User] = [], publ: Bool = true, image: String = "blank") {
+    init(name: String, desc: String, date: Date, creator: User, location: String, tags: [Tag] = [], people: [User] = [], publ: Bool = true, image: String = "blank") {
         self.name = name
         self.image = image
         self.desc = desc
@@ -44,6 +44,7 @@ struct Event: Codable {
         self.location = location
         self.publ = publ
         self.id = 0
+        self.tags = tags
     }
     
     init(event2: Event2) {
@@ -66,6 +67,12 @@ struct Event: Codable {
         self.publ = event2.publicity
         self.image = "blank"
         self.id = event2.id
+        
+        var l: [Tag] = []
+        for i in event2.tag {
+            l.append(Tag(tag: i))
+        }
+        self.tags = l
         
         self.date = Date.decodeTimeStamp(i: event2.time)
         
