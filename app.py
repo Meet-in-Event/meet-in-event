@@ -227,21 +227,28 @@ def delete_interested_event(event_id):
     return success_response(user.serialize())
 
 
-#still working on publicity, dyj: user_id should be in the route I think
 @app.route("/api/events/")
-def get_all_events():
-    body = json.loads(request.data)
-    user = body.get("user_id")
+def get_all_events():            
+    return success_response([t.serialize() for t in Event.query.all()])
+
+
+#still working on publicity
+@app.route("/api/events/<int:user_id>/")
+def get_all_events_for_user(user_id):
+    user = User.query.filter_by(id = id).first()
+    if user is None:
+        return failure_response("User not found!")
+    
     response = []
     for e in Event.query.all():
         if e.publicity is True:
             response.append(e.serialize())
         #what if the initiator wants to let all friends to view the event?
         elif e.publicity is False:
-            if Friend.query.filter_by(me_id = e.creator.id, friend_id = user).first() is not None:
-                response.append(e.serialize())
-            
+            if Friend.query.filter_by(me_id = e.creator.id, friend_id = user_id).first() is not None:
+                response.append(e.serialize())            
     return success_response([c.serialize() for c in response])
+
 
 @app.route("/api/events/<int:event_id>/")
 def get_event(event_id): 
