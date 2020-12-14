@@ -1,191 +1,337 @@
-from flask_sqlalchemy import SQLAlchemy
+from db import db
+from db import Event, Tag, User, Friend, Friend_request
+from flask import Flask, request
+import json
+import os
 
 
-db = SQLAlchemy()
+
+app = Flask(__name__)
+db_filename = "meet-in-event.db"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ECHO"] = True
+
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
+def success_response(data, code = 200):
+    return json.dumps({"success": True, "data": data}), code
+def failure_response(message, code = 404):
+    return json.dumps({"success": False, "error": message}), code
 
 
-association_table_1 = db.Table(
-    "event_creator",
-    db.Model.metadata,
-    db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
-)
+@app.route("/")
+def hello_world():
+    return "Hello world!"
 
-association_table_2 = db.Table(
-    "event_attendor",
-    db.Model.metadata,
-    db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
-)
+# ----------- USER ROUTES -------------------------------------------------------------------
 
-association_table_3 = db.Table(
-    "event_tag",
-    db.Model.metadata,
-    db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("tag_id", db.Integer, db.ForeignKey("tag.id"))
-)
+# TODO: Function for updating for all the fields
 
-association_table_4 = db.Table(
-    "request_sender",
-    db.Model.metadata,
-    db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("sender_netid", db.Integer, db.ForeignKey("user.netid"))
-)
-
-association_table_5 = db.Table(
-    "request_receiver",
-    db.Model.metadata,
-    db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("receiver_netid", db.Integer, db.ForeignKey("user.netid"))
-)
-
-association_table_6 = db.Table(
-    "friend_me",
-    db.Model.metadata,
-    db.Column("friend_netid", db.Integer, db.ForeignKey("friend.friend_netid")),
-    db.Column("me_netid", db.Integer, db.ForeignKey("user.netid"))
-)
-
-
-class Event(db.Model):
-    __tablename__ = "event"
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, nullable=False)
-    location = db.Column(db.String, nullable=False)
-    time = db.Column(db.Integer, nullable=False)
-    description = db.Column(db.String, nullable=False)
-    publicity = db.Column(db.String, nullable=False)
-    tag = db.relationship("Tag", secondary=association_table_3, back_populates="event")
-    creator = db.relationship("User", secondary=association_table_1, back_populates="event_created")
-    attender = db.relationship("User", secondary=association_table_2, back_populates="event_interested")
-
-    def __init__(self, **kwargs):
-        self.title = kwargs.get("title", "") #string, a field to fill in title
-        self.location = kwargs.get("location", "") #string, a field to fill in location
-        self.time = kwargs.get("time", "") #long string contain date and time, slide buttons for date and time on app
-        self.description = kwargs.get("description", "") #string, a field to fill in description
-        self.publicity = kwargs.get("publicity", "") #string, multiple choice:"show to all", "show only to friends", "show only to group of friends"
-
-    def serialize(self):
-        return{
-            "id": self.id,
-            "title": self.title,
-            "location": self.location,
-            "time": self.time,
-            "description": self.description,
-            "publicity": self.publicity,
-            "tag": [s.serialize() for s in self.tag],
-            "creator": [s.serialize_for_event() for s in self.creator],
-            "attender": [s.serialize_for_event() for s in self.attender]
-        }
-
-
-class Tag(db.Model):
-    __tablename__ = "tag"
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, nullable=False)
-    event = db.relationship("Event", secondary=association_table_3, back_populates="tag")
+@app.route("/api/users/", methods=['POST'])
+def create_user():
+    body = json.loads(request.data)
+    n = body.get("name")
+    nid = body.get("netid")
+    scct = body.get("social_account")
+    pswd = body.get("password")
+    if nid is None or n is None or scct is None or pswd is None:
+        return failure_response("Invalid field!")
     
-    def __init__(self, **kwargs):
-        self.title = kwargs.get("title", "") # this is a field that we update limited tags
+    new_user = User(name = n, netid = nid, social_account = scct, password = pswd)
+    db.session.add(new_user)
+    db.session.commit()
+    return success_response(new_user.serialize(), 201)
+
+
+@app.route("/api/users/<netid>/", methods=['GET'])
+def get_user(netid):
+    user = User.query.filter_by(netid = netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    return success_response(user.serialize())
+
+@app.route("/api/friends/<netid>/", methods=['GET'])
+def get_friends(netid):
+    user = User.query.filter_by(netid = netid).first()
     
-    def serialize(self):
-        return{
-            "id": self.id,
-            "title": self.title,
-        }
+    return success_response([friend.serialize() for friend in user.friend])
+
+@app.route("/api/users/<netid>/send/", methods=['POST'])
+def send_friend_request(netid):
+    user = User.query.filter_by(netid = netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    body = json.loads(request.data)
+    friend_netid = body.get("friend_netid")
+    if friend_netid is None:
+        return failure_response("Invalid field!")
+    friend = User.query.filter_by(netid = friend_netid).first()
+    if friend is None:
+        return failure_response("User not found!")
+    #focus on this
+    if friend in user.friend:
+        return failure_response("You are already friends!")
+
+    new_request = Friend_request(sender_netid = str(netid), receiver_netid = friend_netid, accepted = "false")
+    db.session.add(new_request)
+    new_request.sender.append(user)
+    new_request.receiver.append(friend)
+    user.sent_request.append(new_request)
+    friend.received_request.append(new_request)
+
+    db.session.commit()
+    return success_response(new_request.serialize(), 201)
 
 
-class User(db.Model):
-    __tablename__ = "user"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    netid = db.Column(db.String, nullable=False)
-    social_account = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    event_created = db.relationship("Event", secondary=association_table_1, back_populates="creator")
-    event_interested = db.relationship("Event", secondary=association_table_2, back_populates="attender")
-    sent_request = db.relationship("Friend_request", secondary=association_table_4, back_populates="sender")
-    received_request = db.relationship("Friend_request", secondary=association_table_5, back_populates="receiver")
-    friend = db.relationship("Friend", secondary=association_table_6, back_populates="me")
-    x = 0
+@app.route("/api/request/<netid>/", methods=['GET'])
+def get_friend_request(netid):
+    user = User.query.filter_by(netid = netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    return success_response(user.received_request.serialize(), 201)
 
-    def __init__(self, **kwargs):
-        self.name = kwargs.get("name", "") #string
-        self.netid = kwargs.get("netid", "") #string
-        self.password = kwargs.get("password", "") #string
-        self.social_account = kwargs.get("social_account", "") #string
+
+@app.route("/api/users/<netid>/receive/", methods=['POST'])
+def receive_friend_request(netid):
+    receiver = User.query.filter_by(netid = netid).first()
+    if receiver is None:
+        return failure_response("User not found!")
+    body = json.loads(request.data)
     
+    request_id = body.get("request_id")
+    accepted = body.get("accepted")
+
+    the_request = Friend_request.query.filter_by(id = request_id).first()
+    if the_request is None:
+        return failure_response("Request not found!")
     
-    def serialize(self): 
-        event_created = []
-        event_interested =[]
-        
-        if(self.event_created is not None):
-            event_created = [i.serialize() for i in self.event_created]
-        
-        if(self.event_interested is not None):
-            event_interested = [i.serialize() for i in self.event_interested]
-
-        
-        return{
-            "id": self.id,
-            "name": self.name,
-            "netid": self.netid,
-            "social_account": self.social_account,
-            "event_created": event_created,
-            "event_interested": event_interested,
-            "friend": [s.serialize() for s in self.friend]
-        }
-
-    def serialize_for_event(self):
-        return{
-            "id": self.id,
-            "name": self.name,
-            "netid": self.netid,
-            "social_account": self.social_account
-            }
-      
-
-class Friend_request(db.Model):
-    __tablename__ = "friend_request"
-    id = db.Column(db.Integer, primary_key=True)
-    sender_netid = db.Column(db.Integer, nullable=False)
-    receiver_netid = db.Column(db.Integer, nullable=False)
-    sender = db.relationship("User", secondary=association_table_4, back_populates="sent_request")
-    receiver = db.relationship("User", secondary=association_table_5, back_populates="received_request")
-    accepted = db.Column(db.String)
+    sender = User.query.filter_by(netid = the_request.sender_netid).first()
+    if sender is None:
+        return failure_response("User not found!")
+    # change this
+    if receiver in sender.friend:
+        return failure_response("You are already friends!")
+    if accepted not in ("true", "false"):
+        return failure_response("Invalid field!")
     
-    def __init__(self, **kwargs):
-        self.sender_netid = kwargs.get("sender_netid", "") # string, sender"s id
-        self.receiver_netid = kwargs.get("receiver_netid", "") # string, receiver"s id
-        self.accepted = kwargs.get("accepted", "")
+    if accepted == "true":
+        the_request.accepted = "true"
+        new_friend_to_sender = Friend(me_netid = the_request.sender_netid, friend_netid = str(netid))
+        new_friend_to_receiver = Friend(me_netid = str(netid), friend_netid = the_request.sender_netid)
+        new_friend_to_sender.me.append(sender)
+        new_friend_to_receiver.me.append(receiver)
+        db.session.add(new_friend_to_sender)
+        db.session.add(new_friend_to_receiver)
+        sender.friend.append(new_friend_to_sender)
+        receiver.friend.append(new_friend_to_receiver)
+    
+    receiver.received_request.append(the_request)
 
-    def serialize(self):
-        return{
-            "id": self.id,
-            "sender_netid": self.sender_netid,
-            "receiver_netid": self.receiver_netid,
-            "accepted": self.accepted
-        }
+    db.session.commit()
+    return success_response(the_request.serialize(), 201)
+
+
+@app.route("/api/friend/<user_netid>/", methods=['DELETE'])
+def delete_friend(user_netid):
+    user = User.query.filter_by(netid = user_netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    body = json.loads(request.data)
+    friend_netid = body.get("netid")
+    if friend_netid is None:
+        return failure_response("Invalid field!")
+    friend_table = Friend.query.filer_by(friend_netid = friend_netid).first()
+    if friend_table is None:
+        return failure_response("Friend not found!")
+        friend = User.query.filter_by(netid = friend_table.friend_netid).first()
+
+    if friend is None:
+        return failure_response("User not found!")
+
+    user.friend.remove(friend_table)
+    db.session.delete(friend_table)
+    db.session.commit()
+    return success_response(user.serialize(), 201)
+
+
+# ----------- EVENT ROUTES -------------------------------------------------------------------
+
+#still working on tag part
+@app.route("/api/event/<user_netid>/", methods=['POST'])
+def create_event(user_netid):
+    creator = User.query.filter_by(netid = user_netid).first()
+    if creator is None:
+        return failure_response("User not found!")
+    body = json.loads(request.data)
+    title = body.get("title")
+    location = body.get("location")
+    time = body.get("time")
+    
+    description = body.get("description")
+    publicity = body.get("publicity")
+    tags = body.get("tag")
+    
+    if title is None or location is None or time is None or description is None:
+        return failure_response("Invalid field!")
+    new_event = Event(title = title, location = location, time = time, description = description, publicity = publicity)
+    db.session.add(new_event)
+
+    new_event.creator.append(creator)
+    creator.event_created.append(new_event)
+    if tags is not None:
+        for i in tags:
+            the_tag = Tag.query.filter_by(title = i).first()
+            if the_tag is None:
+                return failure_response("Invalid tag field!")
+            new_event.tag.append(the_tag)
+            the_tag.event.append(new_event)
+
+    db.session.commit()
+    return success_response(new_event.serialize(), 201)
+
+
+@app.route("/api/tag/", methods=['POST'])
+def create_tag():
+    body = json.loads(request.data)
+    title = body.get("title")
+    if title is None:
+        return failure_response("Invalid field!")
+    new_tag = Tag(title = title)
+    db.session.add(new_tag)
+    db.session.commit()
+    return success_response(new_tag.serialize(), 201)
+
+@app.route("/api/interestevent/<int:event_id>/", methods=['POST'])
+def interest_event(event_id):
+    event = Event.query.filter_by(id = event_id).first()
+    if event is None:
+        return failure_response("Event not found!")
+    body = json.loads(request.data)
+    user_netid = body.get("user_netid")
+    if user_netid is None:
+        return failure_response("Invalid field!")
+    user = User.query.filter_by(netid = user_netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    if event in user.event_interested:
+        return failure_response("You have already shown interest to this event!")
+    user.event_interested.append(event)
+    event.attender.append(user)
+    db.session.commit()
+    return success_response(user.serialize())
     
 
-class Friend(db.Model):
-    __tablename__ = "friend"
-    id = db.Column(db.Integer, primary_key=True)
-    me = db.relationship("User", secondary=association_table_6, back_populates="friend")
-    me_netid = db.Column(db.String, nullable=False)
-    friend_netid = db.Column(db.String, nullable=False)
+@app.route("/api/events/<int:event_id>/", methods=["DELETE"])
+def delete_event(event_id): 
+    event = Event.query.filter_by(id = event_id).first()
+    if event is None:
+        return failure_response("Event not found!")
+    body = json.loads(request.data)
+    user_netid = body.get("user_netid")
+    if user_netid is None:
+        return failure_response("Invalid field!")
+    user = User.query.filter_by(netid = user_netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    if event not in user.event_created or user not in event.creator:
+        return failure_response("You have no right to delete this event!")
+    db.session.delete(event)
+    db.session.commit()
+    return success_response(event.serialize())
 
-    def __init__(self, **kwargs):
-        self.me_netid = kwargs.get("me_netid", "")
-        self.friend_netid = kwargs.get("friend_netid", "")
+
+@app.route("/api/event/<int:event_id>/", methods=["DELETE"])
+def delete_interested_event(event_id):
+    body = json.loads(request.data)
+    event = Event.query.filter_by(id = event_id).first()
+    if event is None:
+        return failure_response("Event not found!")
+    user_netid= body.get("user_netid")
+    if user_netid is None:
+        return failure_response("Invalid field!")
+    user = User.query.filter_by(netid=user_netid).first()
+    if user is None:
+        return failure_response("User not found!")
+    if event not in user.event_interested:
+        return failure_response("User has not shown interests to this event!")
+    user.event_interested.remove(event)
     
-    def serialize(self):
-        return{
-            "id": self.id,
-            "me_netid": self.me_netid,
-            "friend_netid": self.friend_netid
-        }
+    db.session.commit()
+    return success_response(user.serialize())
 
 
+#still working on publicity, dyj: user_id should be in the route I think
+@app.route("/api/events/")
+def get_all_events():
+    return success_response([t.serialize() for t in Event.query.all()])
+
+#still working on publicity
+@app.route("/api/events/<user_netid>/")
+def get_all_events_for_user(user_netid):
+    user = User.query.filter_by(netid = user_netid).first()
+    if user is None:
+        return failure_response("User not found!")   
+    response = []
+    for e in Event.query.all():
+        if e.publicity == "True":
+            response.append(e.serialize())
+        #what if the initiator wants to let all friends to view the event?
+        elif e.publicity == "False":
+            isFriend = False
+            if user in e.creator:
+                isFriend = True
+            for f in user.friend:
+                for c in e.creator:
+                    if f.friend_netid == c.netid:
+                        isFriend = True
+            if isFriend == True:
+                response.append(e.serialize())
+            
+    return success_response(response)
+
+@app.route("/api/event/<int:event_id>/")
+def get_event(event_id): 
+    body = json.loads(request.data)
+    event = Event.query.filter_by(id = event_id).first()
+    user_netid = body.get("user_netid")
+    
+    if user_netid is None:
+        return failure_response("User not found!") 
+    if event is None:
+        return failure_response("Event not found!")
+    if event.publicity == "False":
+
+        isFriend = False
+        if user in e.creator:
+                isFriend = True
+        for f in user.friend:
+            for c in event.creator:
+                if f.friend_netid == c.netid:
+                    isFriend = True
+        if isFriend == True:
+            return failure_response("you have no access")
+    
+    return success_response(event.serialize())
+
+@app.route("/upload/", methods=["POST"])
+def upload():
+    body=json.loads(request.data)
+    image_data = body.get("image_data")
+    if image_data is None:
+        return failure_response("no base64 URL to be found")
+    
+    asset = Asset(image_data = image_data)
+    db.session.add(asset)
+    db.session.commit()
+    return success_response(asset.serialize(), 201)
+
+    
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
