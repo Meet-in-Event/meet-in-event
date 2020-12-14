@@ -142,7 +142,6 @@ def delete_friend(user_id):
 
 # ----------- EVENT ROUTES -------------------------------------------------------------------
 
-#still working on tag part
 @app.route("/api/event/<int:user_id>/", methods=['POST'])
 def create_event(user_id):
     creator = User.query.filter_by(id = user_id).first()
@@ -154,18 +153,36 @@ def create_event(user_id):
     time = body.get("time")
     description = body.get("description")
     publicity = body.get("publicity")
-    tag = body.get("tag")
+    tags = body.get("tag") #array of string, tag titles
     
     if title is None or location is None or time is None or description is None:
         return failure_response("Invalid field!")
-    new_event = Event(title = title, location = location, time = time, description = description, publicity = publicity, tag = tag)
+    new_event = Event(title = title, location = location, time = time, description = description, publicity = publicity)
     db.session.add(new_event)
 
     new_event.creator.append(creator)
     creator.event_created.append(new_event)
+    for i in tags:
+        the_tag = Tag.query.filter_by(title = i).first()
+        if the_tag is None:
+            return failure_response("Invalid tag field!")
+        new_event.tag.append(the_tag)
+        the_tag.event.append(new_event)
 
     db.session.commit()
     return success_response(new_event.serialize(), 201)
+
+
+@app.route("/api/tag/", methods=['POST'])
+def create_tag():
+    body = json.loads(request.data)
+    title = body.get("title")
+    if title is None:
+        return failure_response("Invalid field!")
+    new_tag = Tag(title = title)
+    db.session.add(new_tag)
+    db.session.commit()
+    return success_response(new_tag.serialize(), 201)
 
 
 @app.route("/api/event/<int:event_id>/", methods=['POST'])
