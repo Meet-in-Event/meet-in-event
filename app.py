@@ -103,8 +103,8 @@ def receive_friend_request(id):
     
     if accepted == "true":
         the_request.accepted = "true"
-        new_friend_to_sender = Friend(friend_id = str(id))
-        new_friend_to_receiver = Friend(friend_id = the_request.sender_id)
+        new_friend_to_sender = Friend(me_id = sender_id, friend_id = str(id))
+        new_friend_to_receiver = Friend(me_id = str(id), friend_id = the_request.sender_id)
         new_friend_to_sender.me.append(sender)
         new_friend_to_receiver.me.append(receiver)
         db.session.add(new_friend_to_sender)
