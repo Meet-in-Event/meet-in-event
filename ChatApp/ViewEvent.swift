@@ -72,7 +72,6 @@ class ViewEvent: UIViewController {
                 isadded=true
             }
         }
-    //    print(event.people.count)
 
                 
         setupViews()

@@ -25,13 +25,11 @@ class NetworkManager {
 
             switch response.result {
             case .success(let data):
-          //      print("-")
                 print(String(decoding: data, as: UTF8.self))
 
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
                 if let userData = try? jsonDecoder.decode(UserDataResponse.self, from: data) {
-                  //  print(userData.data)
                     print("creating user")
                     completion(userData.data, u)
                     
@@ -115,9 +113,7 @@ class NetworkManager {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-//                if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
-//                    completion(eventsData.events)
-//                }
+
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -134,9 +130,7 @@ class NetworkManager {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-//                if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
-//                    completion(eventsData)
-//                }
+
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -153,9 +147,7 @@ class NetworkManager {
             case .success(let data):
                 let jsonDecoder = JSONDecoder()
                 jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-//                if let eventsData = try? jsonDecoder.decode(EventsDataResponse.self, from: data) {
-//                    completion(eventsData)
-//                }
+
             case .failure(let error):
                 print(error.localizedDescription)
             }

@@ -85,11 +85,6 @@ class ViewController: UIViewController {
         tapped=false
         
         
-     //   NetworkManager.getFriendRequest() {
-        
-      //  }
-        //get the friend requests
-        
         
         loginButton = UIButton()
         loginButton.setTitle("Log In", for: .normal)
@@ -161,13 +156,11 @@ class ViewController: UIViewController {
     }
     
     @objc func loginTapped() {
-//        loginButton.backgroundColor = eventColor
         let newViewController = LogIn()
         newViewController.delegate = self
         navigationController?.pushViewController(newViewController, animated: true)
     }
     @objc func signupTapped() {
-    //    signupButton.backgroundColor = eventColor
         let newViewController = SignUp()
         newViewController.delegate = self
         navigationController?.pushViewController(newViewController, animated: true)
@@ -190,7 +183,6 @@ class ViewController: UIViewController {
 
         addPage = AddPage()
         profilePage = ProfilePage()
-       // self.addChild(eventPage)
         self.addChild(addPage)
         self.addChild(profilePage)
 
@@ -248,7 +240,6 @@ class ViewController: UIViewController {
     
     
     @objc func editTapped() {
-      //  edit.tintColor = .magenta
 
         let newViewController = ProfilePageEdit()
         newViewController.delegate = self
@@ -338,14 +329,12 @@ extension ViewController: UITabBarControllerDelegate{
         var temp: [Event] = []
         var pos=0
         var stop=0
-      //  print(events.count)
 
         for i in events {
             pos=0
             stop=0
             if temp.count==0 {
                 temp.append(i)
-             //   print(temp.count)
             }
             else {
                 for j in temp {
@@ -353,7 +342,6 @@ extension ViewController: UITabBarControllerDelegate{
                         if i.date.lessthan(other: j.date) {
                             temp.insert(i, at: pos)
                             print(temp.count)
-                         //   print(pos)
                             stop=1
                         }
                     }
@@ -365,8 +353,6 @@ extension ViewController: UITabBarControllerDelegate{
             }
         }
         events=temp
-     //   print(events.count)
-       // print(events)
     }
 }
 
@@ -506,8 +492,6 @@ extension ViewController: Events, Add, Profile, Login {
     
     func setFav2(i: Event) {
         user.favs?.append(i)
-        //print(i)
-       // print(user.favs)
         
         eventPage.eventCollectionView.reloadData()
     }
@@ -524,7 +508,6 @@ extension ViewController: Events, Add, Profile, Login {
     
     func setUser(i: User) {
         self.user = i
-       // self.edit.tintColor = .cyan
         profilePage=ProfilePage()
         profilePage.delegate = self
         let profileItem = UITabBarItem(title: nil, image: UIImage(named: "profile")?.withRenderingMode(UIImage.RenderingMode.alwaysOriginal), tag: 2)
@@ -566,7 +549,6 @@ extension ViewController: Events, Add, Profile, Login {
     }
     
     func addEvent(i: Event) {
-      //  NetworkManager.createEvent(e: i, user: self.user)
         events.append(i)
         allEvents.append(i)
         sortByDate()
@@ -574,7 +556,6 @@ extension ViewController: Events, Add, Profile, Login {
         eventPage.events=events
         eventPage.allEvents=allEvents
         eventPage.sort()
-       // eventPage.events.append(i)
 
         user.eventCreated?.append(i)
         

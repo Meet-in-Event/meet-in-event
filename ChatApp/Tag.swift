@@ -10,13 +10,7 @@ class Tag: Codable, Equatable {
     static func == (lhs: Tag, rhs: Tag) -> Bool {
         return lhs.tag == rhs.tag
     }
-    
-//    var filtertype: String = ""
-//    var isSelected: Bool = false
-//    init(filtertype: String, isSelected: Bool){
-//        self.filtertype = filtertype
-//        self.isSelected = isSelected
-//    }
+
     
     var tag: String
     var isOn: Bool

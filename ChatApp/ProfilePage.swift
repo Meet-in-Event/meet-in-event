@@ -167,7 +167,6 @@ class ProfilePage: UIViewController {
     }
     
     @objc func eventsTapped() {
-        print("events tapped")
         if !(user.eventInterested?.count==0) {
             let newViewController = MyEvents()
             newViewController.which=0
@@ -178,8 +177,6 @@ class ProfilePage: UIViewController {
         }
     
     @objc func myeventsTapped() {
-        print("my events tapped")
-        print(user.eventCreated)
         if !(user.eventCreated?.count==0) {
             let newViewController = MyEvents()
             newViewController.which=1
@@ -189,7 +186,6 @@ class ProfilePage: UIViewController {
     }
     
     @objc func friendsTapped() {
-        print("friends tapped")
         let newViewController = Friends()
         newViewController.delegate = self.delegate
         delegate?.pushNewView(viewController: newViewController)

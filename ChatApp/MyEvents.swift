@@ -58,7 +58,6 @@ class MyEvents: UIViewController {
             }
         }
         
-       // print(events[0].people.count)
         
         
         
@@ -160,8 +159,7 @@ extension MyEvents: View {
         }
         events[pos3].people.remove(at: pos2)
         events.remove(at: pos3)
-      //  print(currentEvent)
-     //   user=delegate?.getUser()
+      
         eventCollectionView.reloadData()
         navigationController?.popViewController(animated: true)
 
@@ -180,7 +178,6 @@ extension MyEvents: View {
             pos+=1
         }
         events.remove(at: pos3)
-      //  print(currentEvent)
         user=delegate?.getUser()
         eventCollectionView.reloadData()
         navigationController?.popViewController(animated: true)
@@ -195,8 +192,6 @@ extension MyEvents: View {
     }
     
     func getEvent() -> Event? {
-       // print("getting event")
-       // print(currentEvent.people.count)
         return currentEvent
     }
     
@@ -232,8 +227,6 @@ extension MyEvents: View {
         }
         events.remove(at: l)
         eventCollectionView.reloadData()
-        
-       // print("addToView running")
         
        // self.delegate?.addEvent(i: i)
     }

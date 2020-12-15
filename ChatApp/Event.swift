@@ -19,7 +19,6 @@ struct Event2: Codable {
     let description: String
     let publicity: String
     let tag: [String]
- //   let people: [User2]
     let creator: User2
     let attender: [User2]
     

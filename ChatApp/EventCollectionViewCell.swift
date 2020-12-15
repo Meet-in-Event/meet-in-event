@@ -157,7 +157,6 @@ class EventCollectionViewCell: UICollectionViewCell {
         if self.isFav==false {
             star.setImage(UIImage(named: "star"), for: .normal)
         }
-        print(self.isFav)
         
         
     }

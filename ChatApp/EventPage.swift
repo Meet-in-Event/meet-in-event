@@ -100,12 +100,7 @@ class EventPage: UIViewController {
     
     func setupConstraints() {
         
-//        filterCV.snp.makeConstraints{make in
-//            make.top.equalTo(view.)
-//            make.leading.equalToSuperview().offset(padding)
-//            make.height.equalTo(100)
-//            make.trailing.equalToSuperview().offset(-padding)
-//        }
+
         NSLayoutConstraint.activate([
                      filterCV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
                      filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
@@ -139,12 +134,7 @@ extension EventPage: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-//            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! EventCollectionViewCell
-//            cell.delegate=self
-//
-//            cell.configure(for: events[indexPath.item])
-//            collectionView.backgroundColor = backColor
-//            return cell
+
         if(collectionView == filterCV){
                  let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                      
@@ -202,21 +192,13 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
         
             
         if(collectionView == filterCV){
-//            let size = (filterCV.frame.width - 2 * padding)/4.0
-//            return CGSize(width: size, height: 40)
-            
             let size = (collectionView.frame.width - padding*3) / 2.5
             return CGSize(width: size, height: 30)
-            
-//            let size = (filterCV.frame.width - 2 * padding)/2.5
-//            return CGSize(width: size, height: 40)
-
+         
         }else{
             let size = (collectionView.frame.width - padding*2)
         return CGSize(width: size, height: collectionView.frame.height/3.4)
             
-//            let size = (collectionView.frame.width - padding*2)
-//            return CGSize(width: size, height: size/2.0)
         }
         
         
@@ -301,16 +283,7 @@ extension EventPage: View {
 extension EventPage: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        currentEvent = events[indexPath.row]
-//        currentIndex = indexPath.row
-//
-//        let newViewController = ViewEvent()
-//        newViewController.delegate = self
-//        delegate?.pushView(event: currentEvent, viewConroller: newViewController)
-//
-//
-//
-//    collectionView.reloadData()
+
         if(collectionView==filterCV){
                    let f = filters[indexPath.item]
                         if(f.isOn){
