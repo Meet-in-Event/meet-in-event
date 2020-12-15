@@ -6,7 +6,11 @@
 //  Copyright © 2020 Gloria Cai. All rights reserved.
 //
 
-class Tag: Codable {
+class Tag: Codable, Equatable {
+    static func == (lhs: Tag, rhs: Tag) -> Bool {
+        return lhs.tag == rhs.tag
+    }
+    
 //    var filtertype: String = ""
 //    var isSelected: Bool = false
 //    init(filtertype: String, isSelected: Bool){
@@ -24,3 +28,4 @@ class Tag: Codable {
         self.pos = -1
     }
 }
+
