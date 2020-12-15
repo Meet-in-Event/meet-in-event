@@ -5,11 +5,15 @@
 //  Created by Charlie Brush on 12/6/20.
 //
 
+import Foundation
 import UIKit
 
-@main
+@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    override init() {
+        super.init()
+        UIFont.overrideInitialize()
+    }
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -33,4 +37,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
+
 
