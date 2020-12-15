@@ -143,10 +143,11 @@ class EventCollectionViewCell: UICollectionViewCell {
         self.user = delegate?.getUser()
         //self.favs = user.favs
         self.event = event
+      //  print(user.favs)
         if let f = user.favs {
             var pos = 0
             for i in f {
-                if i.id==event.id {
+                if i.name==event.name {
                     self.isFav=true
                     star.setImage(UIImage(named: "star2"), for: .normal)
                 }
@@ -156,6 +157,7 @@ class EventCollectionViewCell: UICollectionViewCell {
         if self.isFav==false {
             star.setImage(UIImage(named: "star"), for: .normal)
         }
+        print(self.isFav)
         
         
     }

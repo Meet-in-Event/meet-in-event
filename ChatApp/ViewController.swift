@@ -464,6 +464,15 @@ extension ViewController: Events, Add, Profile, Login {
             pos+=1
         }
         events.remove(at: pos3)
+        pos=0
+        pos3=0
+        for i in events {
+            if i.id==event.id {
+                pos3=pos
+            }
+            pos+=1
+        }
+        allEvents.remove(at: pos3)
        // event.people.remove(at: pos2)
         pos=0
         var pos4=0
@@ -496,8 +505,8 @@ extension ViewController: Events, Add, Profile, Login {
     
     func setFav2(i: Event) {
         user.favs?.append(i)
-        print(i)
-        print(user.favs)
+        //print(i)
+       // print(user.favs)
         
         eventPage.eventCollectionView.reloadData()
     }

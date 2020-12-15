@@ -386,6 +386,8 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             event = Event(name: eventNameField.text! , desc: descriptionField.text!, date: self.date, creator: user, location: locationField.text!, tags: l)
             NetworkManager.createEvent(e: event, user: self.user) { ev in
                 self.event.id = ev.id
+                print("id \(self.event.id)")
+                print(ev.id)
                 }
             self.delegate?.addEvent(i: event)
             eventNameField.text=""
