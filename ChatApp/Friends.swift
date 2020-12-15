@@ -18,7 +18,6 @@ class Friends: UIViewController {
     
     var currentFriend: User!
     var currentIndex: Int!
-//    var currentCell: FriendTableViewCell!
     
     let reuseIdentifier = "friendCellReuse"
     

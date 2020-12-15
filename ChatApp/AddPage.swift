@@ -67,9 +67,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          eventNameField = UITextField()
          eventNameField.translatesAutoresizingMaskIntoConstraints = false
          eventNameField.backgroundColor = backColor
-//         eventNameField.layer.borderWidth = 1
-//         eventNameField.layer.cornerRadius = 10
-//         eventNameField.layer.borderColor = UIColor.black.cgColor
+
          eventNameField.textAlignment = .center
          eventNameField.textColor = .black
         eventNameField.attributedPlaceholder = NSAttributedString(string:"Event Title", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray, NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 30.0)!])
@@ -152,9 +150,6 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
          category.layer.cornerRadius = 10
         category.layer.borderColor = textFieldColor.cgColor
         category.backgroundColor = textFieldColor
-//         category.textAlignment = .center
-//         category.textColor = .black
-//         category.attributedPlaceholder = NSAttributedString(string:"Description", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray])
          view.addSubview(category)
          
         
@@ -188,7 +183,6 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         datePicker.timeZone = NSTimeZone.local
         datePicker.backgroundColor = backColor
                
-               // Add an event to call onDidChangeDate function when value is changed.
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
           
         view.addSubview(datePicker)
@@ -255,7 +249,6 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             make.height.equalTo(30)
         }
         
-      //  datePicker.frame = CGRect(x: 10, y: 300, width: self.view.frame.width, height: 200)
        
 
         datePicker.snp.makeConstraints{make in
@@ -267,13 +260,6 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         }
         
        
-//        NSLayoutConstraint.activate([
-//            filterCV.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: offset),
-//                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-//                     filterCV.heightAnchor.constraint(equalToConstant: 40),
-//                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
-//                            ]);
-      
         category.snp.makeConstraints{ make in
             make.top.equalTo(datePicker.snp.bottom).offset(offset)
             make.centerX.equalTo(view.snp.centerX)
@@ -317,15 +303,10 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
      }
     @objc func datePickerValueChanged(_ sender: UIDatePicker){
          
-         // Create date formatter
          let dateFormatter: DateFormatter = DateFormatter()
 
-         // Set date format
          dateFormatter.dateFormat = "MM/dd/yyyy hh:mm a"
         
-         
-         // Apply date format
-    //     let selectedDate: String = dateFormatter.string(from: sender.date)
         
         
         dateFormatter.dateFormat = "yyyy"
@@ -354,10 +335,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         print(suf)
 
         date = Date(year: yearInt, mon: monthInt-1, day: dayInt, hour: hourInt, min: minInt, suf: suf)
-//        let Index1 = selectedDate.index(selectedDate.startIndex, offsetBy: 0)
-//        let Index2 = selectedDate.index(selectedDate.startIndex, offsetBy: 1)
-//        print(selectedDate[Index2]+selectedDate[Index2])
-     //    print("Selected value \(selectedDate)")
+
 
     
     
@@ -393,9 +371,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             eventNameField.text=""
             descriptionField.text=""
             locationField.text=""
-//            for i in filters {
-//                i.isOn = false
-//            }
+
                                 
             self.delegate?.home()
             }
