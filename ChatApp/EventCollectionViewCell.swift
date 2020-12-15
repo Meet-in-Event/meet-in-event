@@ -141,9 +141,9 @@ class EventCollectionViewCell: UICollectionViewCell {
         imageView.image = UIImage(named: event.image)
         self.isFav=false
         self.user = delegate?.getUser()
-        self.favs = user.favs
+        //self.favs = user.favs
         self.event = event
-        if let f = favs {
+        if let f = user.favs {
             var pos = 0
             for i in f {
                 if i.id==event.id {

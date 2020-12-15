@@ -127,7 +127,7 @@ class ViewController: UIViewController {
     func getAllEvents() {
         NetworkManager.getEvents() { events2 in
             for i in events2 {
-                if !(i.publicity) {
+                if i.publicity=="False" {
                     if let f = self.user.friends {
                         for j in f {
                             if j.netid==i.creator.netid {
@@ -216,7 +216,7 @@ class ViewController: UIViewController {
         tab.setViewControllers([eventPage,addPage,profilePage], animated: false)
         tab.selectedIndex = 0
         self.navigationItem.title="Events"
-        eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.cyan)
+        eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.purple)
         tab.delegate = self
 
         
@@ -280,7 +280,7 @@ class ViewController: UIViewController {
                 }
             }
             events=e
-            eventPage.events = events
+            eventPage.allEvents = events
             eventPage.sort()
             eventPage.eventCollectionView.reloadData()
             
@@ -289,7 +289,7 @@ class ViewController: UIViewController {
             tapped=false
             starButton.tintColor = .white
             events=allEvents
-            eventPage.events = events
+            eventPage.allEvents = events
             eventPage.sort()
             eventPage.eventCollectionView.reloadData()
             
@@ -305,16 +305,15 @@ extension ViewController: UITabBarControllerDelegate{
 
         if tab.selectedIndex==0 {
             self.navigationItem.title="Events"
-            eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.cyan)
+            eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.purple)
             addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.white)
             profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.white)
             navigationItem.rightBarButtonItem = nil
             starButtonSetup()
-
         }
         if tab.selectedIndex==1 {
             self.navigationItem.title="Add Event"
-            addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.cyan)
+            addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.purple)
             eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.white)
             profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.white)
             navigationItem.rightBarButtonItem = nil
@@ -322,7 +321,7 @@ extension ViewController: UITabBarControllerDelegate{
         }
         if tab.selectedIndex==2 {
             self.navigationItem.title="Profile"
-            profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.cyan)
+            profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.purple)
             eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.white)
             addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.white)
            // editButton()
@@ -497,6 +496,8 @@ extension ViewController: Events, Add, Profile, Login {
     
     func setFav2(i: Event) {
         user.favs?.append(i)
+        print(i)
+        print(user.favs)
         
         eventPage.eventCollectionView.reloadData()
     }
@@ -561,6 +562,8 @@ extension ViewController: Events, Add, Profile, Login {
         sortByDate()
 
         eventPage.events=events
+        eventPage.allEvents=allEvents
+        eventPage.sort()
        // eventPage.events.append(i)
 
         user.eventCreated?.append(i)
@@ -572,7 +575,7 @@ extension ViewController: Events, Add, Profile, Login {
     
     func home() {
         self.tab.selectedIndex=0
-        eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.cyan)
+        eventPage.tabBarItem.image = eventPage.tabBarItem.image?.withTintColor(.purple)
         addPage.tabBarItem.image = addPage.tabBarItem.image?.withTintColor(.white)
         profilePage.tabBarItem.image = profilePage.tabBarItem.image?.withTintColor(.white)
         

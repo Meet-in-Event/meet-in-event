@@ -11,15 +11,20 @@ struct EventsDataResponse: Codable {
 }
 
 struct Event2: Codable {
+    let id: Int
+    
     let title: String
     let location: String
     let time: Int
     let description: String
-    let publicity: Bool
-    let people: [User]
-    let creator: User
+    let publicity: String
     let tag: [String]
-    let id: Int
+ //   let people: [User2]
+    let creator: User2
+    let attender: [User2]
+    
+
+   
 }
 
 struct Event: Codable {
@@ -54,17 +59,27 @@ struct Event: Codable {
         
         //turn this into a date object
         //self.date = event2.time
-      //  self.people = event2.people
+    //    self.people = event2.people
 //        var l: [User] = []
 //        for i in event2.people {
 //            l.append(User(user2: i))
 //        }
-        self.people = event2.people
+        var k: [User] = []
+        for i in event2.attender {
+            k.append(User(user2: i))
+        }
+        self.people = k
+        //self.people = event2.attender
      //   self.people = l
-       // self.creator = User(user2: event2.creator)
-        self.creator = event2.creator
+        self.creator = User(user2: event2.creator)
+       // self.creator = event2.creator
         self.location = event2.location
-        self.publ = event2.publicity
+        if event2.publicity=="True" {
+            self.publ = true
+        }
+        else {
+            self.publ=false
+        }
         self.image = "blank"
         self.id = event2.id
         

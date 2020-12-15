@@ -42,8 +42,8 @@ class EventPage: UIViewController {
     var allEvents: [Event]!
     
     var filter1 = Tag(tag: "Sports")
-      var filter2 = Tag(tag: "Music")
-      var filter3 = Tag(tag: "Study")
+    var filter2 = Tag(tag: "Music")
+    var filter3 = Tag(tag: "Study")
     var filter4 = Tag(tag: "Outdoors")
     var filter5 = Tag(tag: "Shopping")
     var filter6 = Tag(tag: "Other")
@@ -109,7 +109,7 @@ class EventPage: UIViewController {
         NSLayoutConstraint.activate([
                      filterCV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
                      filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-                     filterCV.heightAnchor.constraint(equalToConstant: 40),
+                     filterCV.heightAnchor.constraint(equalToConstant: 50),
                      filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
                             ]);
         
@@ -176,10 +176,13 @@ extension EventPage: UICollectionViewDataSource {
                       }}
                   else{
                   for e in allEvents{
+                    var contains = false
                    if let i = e.tags {
                       for f in i{
-                          if(f.isOn)
-                          { events.append(e)}
+                          if(f.isOn) && contains==false
+                          { events.append(e)
+                            contains = true
+                          }
                       }
                    }
                           }}
@@ -204,10 +207,16 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
             
             let size = (collectionView.frame.width - padding*3) / 2.5
             return CGSize(width: size, height: 30)
+            
+//            let size = (filterCV.frame.width - 2 * padding)/2.5
+//            return CGSize(width: size, height: 40)
 
         }else{
             let size = (collectionView.frame.width - padding*2)
         return CGSize(width: size, height: collectionView.frame.height/3.4)
+            
+//            let size = (collectionView.frame.width - padding*2)
+//            return CGSize(width: size, height: size/2.0)
         }
         
         
@@ -306,9 +315,28 @@ extension EventPage: UICollectionViewDelegate {
                    let f = filters[indexPath.item]
                         if(f.isOn){
                             filters[indexPath.item].isOn = false
+                            for i in allEvents {
+                                if let t = i.tags {
+                                    for j in t {
+                                        if j.tag==filters[indexPath.item].tag {
+                                            j.isOn=false
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                         else{
                             filters[indexPath.item].isOn = true
+                            for i in allEvents {
+                                if let t = i.tags {
+                                    for j in t {
+                                        if j.tag==filters[indexPath.item].tag {
+                                            j.isOn=true
+                                        }
+                                    }
+                                }
+                            }
                         }
                          sort()
                    

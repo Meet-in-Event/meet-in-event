@@ -5,10 +5,14 @@
 //  Created by Charlie Brush on 12/6/20.
 //
 
+private var filterCV: UICollectionView!
+let filterReuseIdentifier = "filterReuseIdentifier"
+
+
 import UIKit
 class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPickerViewDataSource {
     
-    
+    let padding: CGFloat = 8
     
     weak var delegate: Add?
     var event: Event!
@@ -25,14 +29,16 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
     var descIcon: UIImageView!
     var locIcon: UIImageView!
     var timeIcon: UIImageView!
+    var visIcon: UIImageView!
+    var tagIcon: UIImageView!
+
     
-    var filterCV: UICollectionView!
-    let tagCellReuseIdentifier = "tagCellReuseIdentifier"
+
     
     var filter1 = Tag(tag: "Sports")
       var filter2 = Tag(tag: "Music")
       var filter3 = Tag(tag: "Study")
-    var filter4 = Tag(tag: "Outdoors")
+    var filter4 = Tag(tag: "Outdoor")
     var filter5 = Tag(tag: "Shopping")
     var filter6 = Tag(tag: "Other")
     
@@ -107,6 +113,24 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         timeIcon.contentMode = .scaleAspectFill
         timeIcon.image = UIImage(named: "calendar")
         view.addSubview(timeIcon)
+        
+        visIcon = UIImageView()
+        visIcon.translatesAutoresizingMaskIntoConstraints = false
+        visIcon.clipsToBounds = true
+       visIcon.layer.masksToBounds = true
+         visIcon.contentMode = .scaleAspectFill
+        visIcon.image = UIImage(named: "visibility")
+              view.addSubview(visIcon)
+
+        
+        tagIcon = UIImageView()
+        tagIcon.translatesAutoresizingMaskIntoConstraints = false
+         tagIcon.clipsToBounds = true
+         tagIcon.layer.masksToBounds = true
+          tagIcon.contentMode = .scaleAspectFill
+        tagIcon.image = UIImage(named: "price-tag")
+              view.addSubview(tagIcon)
+        
 
         
         locationField = UITextField()
@@ -154,7 +178,7 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         
         filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
         filterCV.backgroundColor = backColor
-        filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: tagCellReuseIdentifier)
+        filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: filterReuseIdentifier)
         filterCV.dataSource = self
         filterCV.delegate = self
         filterCV.translatesAutoresizingMaskIntoConstraints = false
@@ -237,38 +261,58 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
         datePicker.snp.makeConstraints{make in
             make.top.equalTo(locationField.snp.bottom).offset(offset)
             make.centerX.equalTo(view.snp.centerX).offset(20)
-            make.width.equalTo(view.frame.width - 80)
+            make.width.equalTo(view.frame.width - 100)
             make.height.equalTo(50)
                    
         }
         
        
-        NSLayoutConstraint.activate([
-            filterCV.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: offset),
-                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-                     filterCV.heightAnchor.constraint(equalToConstant: 40),
-                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
-                            ]);
+//        NSLayoutConstraint.activate([
+//            filterCV.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: offset),
+//                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+//                     filterCV.heightAnchor.constraint(equalToConstant: 40),
+//                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
+//                            ]);
       
         category.snp.makeConstraints{ make in
-            make.top.equalTo(filterCV.snp.bottom).offset(offset)
+            make.top.equalTo(datePicker.snp.bottom).offset(offset)
             make.centerX.equalTo(view.snp.centerX)
                            make.width.equalTo(150)
                            make.height.equalTo(50)
                        }
+        NSLayoutConstraint.activate([
+                     filterCV.topAnchor.constraint(equalTo:category.bottomAnchor, constant: 30),
+                     filterCV.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 70),
+                     filterCV.heightAnchor.constraint(equalToConstant: 50),
+                     filterCV.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50)
+                            ]);
+        
         
         error.snp.makeConstraints{make in
-            make.top.equalTo(category.snp.bottom).offset(15)
+            make.top.equalTo(filterCV.snp.bottom).offset(15)
             make.centerX.equalToSuperview()
         }
         
         
         saveButton.snp.makeConstraints{make in
-            make.top.equalTo(category.snp.bottom).offset(40)
+            make.top.equalTo(filterCV.snp.bottom).offset(40)
             make.centerX.equalTo(view.snp.centerX)
             make.width.equalTo(60)
             make.height.equalTo(30)
                 }
+        
+        visIcon.snp.makeConstraints{ make in
+         make.top.equalTo(category.snp.top).offset(10)
+                    make.centerX.equalTo(descIcon)
+                   make.width.equalTo(30)
+                   make.height.equalTo(30)
+               }
+         tagIcon.snp.makeConstraints{ make in
+             make.top.equalTo(filterCV.snp.top).offset(10)
+                    make.centerX.equalTo(descIcon)
+                   make.width.equalTo(30)
+                   make.height.equalTo(30)
+               }
          
      }
     @objc func datePickerValueChanged(_ sender: UIDatePicker){
@@ -347,9 +391,10 @@ class AddPage: UIViewController, UITextViewDelegate,  UIPickerViewDelegate, UIPi
             eventNameField.text=""
             descriptionField.text=""
             locationField.text=""
-            for i in filters {
-                i.isOn = false
-            }
+//            for i in filters {
+//                i.isOn = false
+//            }
+                                
             self.delegate?.home()
             }
         
@@ -396,7 +441,7 @@ extension AddPage: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     
-                 let cell = filterCV.dequeueReusableCell(withReuseIdentifier: tagCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
+                 let cell = filterCV.dequeueReusableCell(withReuseIdentifier: filterReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                      
         cell.configure(for: filters[indexPath.item], color1: textFieldColor, color2: UIColor(red: 255/255.0, green: 175/255.0, blue: 97/255.0, alpha: 1))
      //   cell.contentView.backgroundColor = textFieldColor
@@ -409,8 +454,10 @@ extension AddPage: UICollectionViewDataSource {
 extension AddPage: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-            let size = (collectionView.frame.width - 24) / 2.5
-            return CGSize(width: size, height: 30)
+//            let size = (collectionView.frame.width - 24) / 2.5
+//            return CGSize(width: size, height: 30)
+        let size = (filterCV.frame.width - 2 * padding)/2.5
+            return CGSize(width: size, height: 40)
     }
 }
    

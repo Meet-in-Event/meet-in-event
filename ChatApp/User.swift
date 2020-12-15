@@ -15,9 +15,9 @@ struct User2: Codable {
     let name: String
     let netid: String
     let socialAccount: String
-    let eventCreated: [Event]
-    let eventInterested: [Event]
-    let friend: [User]
+    let eventCreated: [Event2]
+    let eventInterested: [Event2]
+    let friend: [User2]
   //  let password: String
 }
 
@@ -53,10 +53,24 @@ struct User: Codable {
         self.name = user2.name
        // self.password = user2.password
     //    self.image = image
-        self.friends = []
-     //   self.eventInterested = user2.eventInterested
+        var l: [User] = []
+        for i in user2.friend {
+            l.append(User(user2: i))
+        }
+        self.friends = l
+        var k: [Event] = []
+        for i in user2.eventInterested {
+            k.append(Event(event2: i))
+        }
+        self.eventInterested = k
+       // self.eventInterested = user2.eventInterested
         self.favs = []
-      //  self.eventCreated = user2.eventCreated
+        var g: [Event] = []
+        for i in user2.eventCreated {
+            g.append(Event(event2: i))
+        }
+        self.eventCreated = g
+       // self.eventCreated = user2.eventCreated
         self.socialAccount = user2.socialAccount
         self.id = user2.id
         

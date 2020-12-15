@@ -37,7 +37,7 @@ class Friends: UIViewController {
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
         
         user = self.delegate?.getUser()
-        self.friends = user.friends
+       // self.friends = user.friends
 //        if let f = delegate?.getRequest() {
 //            for i in f {
 //                self.friends.append(i)
@@ -72,6 +72,9 @@ class Friends: UIViewController {
 
 extension Friends: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if friends==nil {
+            return 0
+        }
         return friends.count
     }
     
