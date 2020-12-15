@@ -1,47 +1,49 @@
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
+
 association_table_1 = db.Table(
-    "association1",
+    "event_creator",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"))
+    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_2 = db.Table(
-    "association2",
+    "event_attendor",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
-    db.Column("user_id", db.Integer, db.ForeignKey("user.id"))
+    db.Column("user_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_3 = db.Table(
-    "association3",
+    "event_tag",
     db.Model.metadata,
     db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
     db.Column("tag_id", db.Integer, db.ForeignKey("tag.id"))
 )
 
 association_table_4 = db.Table(
-    "association4",
+    "request_sender",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("sender", db.Integer, db.ForeignKey("user.id"))
+    db.Column("sender_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_5 = db.Table(
-    "association5",
+    "request_receiver",
     db.Model.metadata,
     db.Column("request_id", db.Integer, db.ForeignKey("friend_request.id")),
-    db.Column("receiver", db.Integer, db.ForeignKey("user.id"))
+    db.Column("receiver_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 association_table_6 = db.Table(
-    "association6",
+    "friend_me",
     db.Model.metadata,
-    db.Column("friend", db.Integer, db.ForeignKey("friend.id")),
-    db.Column("me", db.Integer, db.ForeignKey("user.id"))
+    db.Column("friend_netid", db.Integer, db.ForeignKey("friend.friend_netid")),
+    db.Column("me_netid", db.Integer, db.ForeignKey("user.netid"))
 )
 
 
@@ -50,7 +52,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     location = db.Column(db.String, nullable=False)
-    time = db.Column(db.String, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String, nullable=False)
     publicity = db.Column(db.String, nullable=False)
     tag = db.relationship("Tag", secondary=association_table_3, back_populates="event")
@@ -126,14 +128,14 @@ class User(db.Model):
             event_interested = [i.serialize() for i in self.event_interested]
 
         
-        
         return{
             "id": self.id,
             "name": self.name,
             "netid": self.netid,
             "social_account": self.social_account,
             "event_created": event_created,
-            "event_interested": event_interested
+            "event_interested": event_interested,
+            "friend": [s.serialize() for s in self.friend]
         }
 
     def serialize_for_event(self):
@@ -148,22 +150,22 @@ class User(db.Model):
 class Friend_request(db.Model):
     __tablename__ = "friend_request"
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
+    sender_netid = db.Column(db.Integer, nullable=False)
+    receiver_netid = db.Column(db.Integer, nullable=False)
     sender = db.relationship("User", secondary=association_table_4, back_populates="sent_request")
     receiver = db.relationship("User", secondary=association_table_5, back_populates="received_request")
     accepted = db.Column(db.String)
     
     def __init__(self, **kwargs):
-        self.sender_id = kwargs.get("sender_id", "") # string, sender"s id
-        self.receiver_id = kwargs.get("receiver_id", "") # string, receiver"s id
+        self.sender_netid = kwargs.get("sender_netid", "") # string, sender"s id
+        self.receiver_netid = kwargs.get("receiver_netid", "") # string, receiver"s id
         self.accepted = kwargs.get("accepted", "")
 
     def serialize(self):
         return{
             "id": self.id,
-            "sender_id": self.sender_id,
-            "receiver_id": self.receiver_id,
+            "sender_netid": self.sender_netid,
+            "receiver_netid": self.receiver_netid,
             "accepted": self.accepted
         }
     
@@ -172,13 +174,17 @@ class Friend(db.Model):
     __tablename__ = "friend"
     id = db.Column(db.Integer, primary_key=True)
     me = db.relationship("User", secondary=association_table_6, back_populates="friend")
-    friend_id = db.Column(db.String, nullable=False)
+    me_netid = db.Column(db.String, nullable=False)
+    friend_netid = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
-        self.friend_id = kwargs.get("friend_id", "")
+        self.me_netid = kwargs.get("me_netid", "")
+        self.friend_netid = kwargs.get("friend_netid", "")
     
     def serialize(self):
         return{
             "id": self.id,
-            "friend_id": self.friend_id
+            "me_netid": self.me_netid,
+            "friend_netid": self.friend_netid
         }
+
