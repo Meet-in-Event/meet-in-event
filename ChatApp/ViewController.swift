@@ -227,8 +227,31 @@ class ViewController: UIViewController {
     func initialize() {
         getAllEvents()
         if events==nil {
-            events=[(Event(name: "Blank", desc: "Nothing", date: Date(year: 20, mon: 1, day: 1, hour: 1, min: 1, suf: "AM"), creator: user, location: "Nowhere"))]
+            events=[(Event(name: "Hiking", desc: "Come explore the beautiful gorges!", date: Date(year: 20, mon: 11, day: 17, hour: 5, min: 30, suf: "PM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "Cayuga Trail", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)])),
+                    
+                    (Event(name: "Picnic", desc: "Join us for a nice picnic", date: Date(year: 20, mon: 11, day: 20, hour: 2, min: 15, suf: "PM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "The Slope", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)])),
+                    
+                
+                    (Event(name: "Sledding in a Snowstorm", desc: "A snowstorm is the perfect time for sledding!", date: Date(year: 20, mon: 11, day: 15, hour: 9, min: 30, suf: "AM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "The Slope", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)])),
+                    
+                    
+                    (Event(name: "Studying", desc: "Come study for finals", date: Date(year: 20, mon: 11, day: 16, hour: 11, min: 45, suf: "PM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "Upson Hall", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)])),
+                    
+                    (Event(name: "Climb the Belltower", desc: "Join us for a race up the belltower", date: Date(year: 20, mon: 11, day: 17, hour: 5, min: 30, suf: "PM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "Tower", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)])),
+                    
+                    (Event(name: "Solar Eclipse", desc: "Come marvel at the wonders of nature", date: Date(year: 20, mon: 11, day: 20, hour: 4, min: 15, suf: "PM"), creator: User(netid: "cfb96", name: "Charlie", password: "password", socialAccount: "@cfb", id: 100), location: "The Slope", people: [User(netid: "netid2", name: "Random Person", password: "pass", socialAccount: "@rand", id: 101)]))
+            ]
+            
+            
+            events[0].tags = [Tag(tag: "Outdoor")]
+            events[1].tags = [Tag(tag: "Outdoor"),Tag(tag: "Other")]
+            events[2].tags = [Tag(tag: "Outdoor"),Tag(tag: "Sports")]
+            events[3].tags = [Tag(tag: "Study")]
+            events[4].tags = [Tag(tag: "Sports")]
+            events[5].tags = [Tag(tag: "Outdoor"),Tag(tag: "Other")]
+            
         }
+        
         sortByDate()
         allEvents = events
     }
@@ -273,7 +296,7 @@ class ViewController: UIViewController {
             for i in events {
                 if let f = user.favs {
                     for j in f {
-                        if i.id==j.id {
+                        if i.name==j.name {
                             e.append(i)
                         }
                     }
@@ -395,7 +418,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos3=0
         for i in events {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos3=pos
             }
             pos+=1
@@ -405,7 +428,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos4=0
         for i in user.eventInterested! {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos4=pos
             }
             pos+=1
@@ -438,7 +461,7 @@ extension ViewController: Events, Add, Profile, Login {
         var pos=0
         var pos3=0
         for i in events {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos3=pos
             }
             pos+=1
@@ -458,7 +481,7 @@ extension ViewController: Events, Add, Profile, Login {
         var pos=0
         var pos3=0
         for i in events {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos3=pos
             }
             pos+=1
@@ -467,7 +490,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         pos3=0
         for i in events {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos3=pos
             }
             pos+=1
@@ -477,7 +500,7 @@ extension ViewController: Events, Add, Profile, Login {
         pos=0
         var pos4=0
         for i in user.eventCreated! {
-            if i.id==event.id {
+            if i.name==event.name {
                 pos4=pos
             }
             pos+=1
@@ -513,7 +536,7 @@ extension ViewController: Events, Add, Profile, Login {
     func removeFav2(i: Event) {
         var pos = 0
         for j in user.favs! {
-            if j.id==i.id {
+            if j.name==i.name {
                 user.favs?.remove(at: pos)
             }
             pos+=1
