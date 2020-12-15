@@ -37,9 +37,9 @@ class EventPage: UIViewController {
     
     
     var filter1 = Tag(tag: "Sports")
-      var filter2 = Tag(tag: "Music")
-      var filter3 = Tag(tag: "Study Dates")
-    var filter4 = Tag(tag: "Outdoor Activities")
+    var filter2 = Tag(tag: "Music")
+    var filter3 = Tag(tag: "Study")
+    var filter4 = Tag(tag: "Outdoor")
     var filter5 = Tag(tag: "Shopping")
     var filter6 = Tag(tag: "Other")
 
@@ -52,7 +52,7 @@ class EventPage: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor=backColor
+        view.backgroundColor = backColor
         
         allEvents = delegate?.getEvents()
         events = []
@@ -85,7 +85,7 @@ class EventPage: UIViewController {
         
         
                filterCV = UICollectionView(frame: .zero, collectionViewLayout: filterLayout)
-               filterCV.backgroundColor = .white
+               filterCV.backgroundColor = backColor
                filterCV.register(FilterCollectionViewCell.self, forCellWithReuseIdentifier: eventCellReuseIdentifier)
                filterCV.dataSource = self
                filterCV.delegate = self
@@ -133,7 +133,7 @@ extension EventPage: UICollectionViewDataSource {
          if(collectionView == filterCV){
                   let cell = filterCV.dequeueReusableCell(withReuseIdentifier: eventCellReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
                                       
-            cell.configure(for: filters[indexPath.item])
+                    cell.configure(for: filters[indexPath.item])
                   return cell
               }
               else{
@@ -158,7 +158,7 @@ extension EventPage: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
                 if(collectionView == filterCV){
-                    let size = (filterCV.frame.width - 2 * padding)/4.0
+                    let size = (filterCV.frame.width - 2 * padding)/2.5
                     return CGSize(width: size, height: 40)
 
                 }else{
@@ -213,7 +213,7 @@ extension EventPage: View {
         var pos=0
         var e: [Event] = []
         for j in events {
-            if !(j.id==i.id) {
+            if !(j.name==i.name) {
                 e.append(j)
             }
             pos+=1
@@ -225,7 +225,7 @@ extension EventPage: View {
     func addToView(i: Event) {
         var pos=(-1)
         for j in events {
-            if j.id==i.id {
+            if j.name==i.name {
                 pos=1
             }
         }
@@ -257,11 +257,16 @@ extension EventPage: UICollectionViewDelegate {
                         else{
                             filters[indexPath.item].isOn = true
                         }
+                filterCV.reloadData()
                          var falseCount = 0
                             events.removeAll()
+                        var filtersOn: [Tag] = []
                              for filter in filters{
                                        if (filter.isOn == false)
                                        {falseCount+=1}
+                                       else{
+                                        filtersOn.append(filter)
+                                }
                                                                
                                    }
                                    if(falseCount == filters.count){
@@ -269,17 +274,23 @@ extension EventPage: UICollectionViewDelegate {
                                            events.append(e)
                                        }}
                                    else{
+
                                    for e in allEvents{
+                                    for f in e.tags{
+                                        if (filtersOn.contains(f)){
+                                            events.append(e)
+                                        }
+                                        else
+                                        { print("problem")}
+                                    }
                                        for f in e.tags{
                                            if(f.isOn)
                                            { events.append(e)}
-                                       
+
                                     }
                                            }}
                         filterCV.reloadData()
                         eventCollectionView.reloadData()
-                   
-                   
                    
                    
                    
@@ -296,12 +307,10 @@ extension EventPage: UICollectionViewDelegate {
                
            collectionView.reloadData()
     }
+
+
+
+
+    
+    
 }
-
-
-
-    
-    
-
-
-
